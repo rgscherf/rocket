@@ -10,108 +10,45 @@ Elm.Main.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var init = {_: {}
-              ,pos: {ctor: "_Tuple2"
-                    ,_0: -250
-                    ,_1: -250}
-              ,thrusting: false
-              ,vel: {ctor: "_Tuple2"
-                    ,_0: 0
-                    ,_1: 0}};
-   var Model = F3(function (a,
-   b,
-   c) {
-      return {_: {}
-             ,pos: a
-             ,thrusting: c
-             ,vel: b};
-   });
-   var Tick = function (a) {
-      return {ctor: "Tick",_0: a};
-   };
-   var MouseButton = function (a) {
-      return {ctor: "MouseButton"
-             ,_0: a};
-   };
-   var signals = $Signal.mergeMany(_L.fromArray([A2($Signal.map,
-                                                MouseButton,
-                                                $Mouse.isDown)
-                                                ,A2($Signal.map,
-                                                Tick,
-                                                $Time.fps(60))]));
-   var scalar = 0.15;
-   var accel = 0.25 * scalar;
-   var decay = 0.1 * scalar;
-   var update = F2(function (action,
-   model) {
+   $Signal = Elm.Signal.make(_elm);
+   var view = function (_v0) {
       return function () {
-         switch (action.ctor)
-         {case "MouseButton":
-            return _U.replace([["thrusting"
-                               ,action._0]],
-              model);
-            case "Tick":
-            return function () {
-                 var velocity = model.thrusting ? {ctor: "_Tuple2"
-                                                  ,_0: $Basics.fst(model.vel) + accel
-                                                  ,_1: $Basics.snd(model.vel) + accel} : {ctor: "_Tuple2"
-                                                                                         ,_0: A2($Basics.max,
-                                                                                         0,
-                                                                                         $Basics.fst(model.vel) - decay)
-                                                                                         ,_1: A2($Basics.max,
-                                                                                         0,
-                                                                                         $Basics.snd(model.vel) - decay)};
-                 return _U.replace([["pos"
-                                    ,{ctor: "_Tuple2"
-                                     ,_0: $Basics.fst(model.pos) + $Basics.fst(velocity)
-                                     ,_1: $Basics.snd(model.pos) + $Basics.snd(velocity)}]
-                                   ,["vel",velocity]],
-                 model);
-              }();}
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return A2($Html.div,
+              _L.fromArray([]),
+              _L.fromArray([$Html.fromElement($Graphics$Element.show(_v0._0))
+                           ,$Html.fromElement($Graphics$Element.show(_v0._1))
+                           ,$Html.fromElement($Graphics$Element.show(A2($Basics.atan2,
+                           _v0._0,
+                           _v0._1)))]));}
          _U.badCase($moduleName,
-         "between lines 51 and 65");
+         "between lines 15 and 20");
       }();
-   });
-   var model = A3($Signal.foldp,
-   update,
-   init,
-   signals);
-   var windowside = 700;
-   var render = function (model) {
-      return A3($Graphics$Collage.collage,
-      windowside,
-      windowside,
-      _L.fromArray([$Graphics$Collage.move({ctor: "_Tuple2"
-                                           ,_0: $Basics.fst(model.pos)
-                                           ,_1: $Basics.snd(model.pos)})($Graphics$Collage.filled($Color.green)(A2($Graphics$Collage.ngon,
-      3,
-      20)))]));
    };
    var main = A2($Signal.map,
-   render,
-   model);
+   view,
+   A2($Signal.map,
+   function (_v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return {ctor: "_Tuple2"
+                   ,_0: $Basics.toFloat(_v4._0)
+                   ,_1: $Basics.toFloat(_v4._1)};}
+         _U.badCase($moduleName,
+         "on line 8, column 37 to 57");
+      }();
+   },
+   $Mouse.position));
    _elm.Main.values = {_op: _op
-                      ,windowside: windowside
-                      ,scalar: scalar
-                      ,accel: accel
-                      ,decay: decay
-                      ,signals: signals
-                      ,MouseButton: MouseButton
-                      ,Tick: Tick
-                      ,model: model
                       ,main: main
-                      ,update: update
-                      ,Model: Model
-                      ,init: init
-                      ,render: render};
+                      ,view: view};
    return _elm.Main.values;
 };

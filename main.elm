@@ -15,7 +15,7 @@ windowside = 700
 -- change with window size to maintain
 -- proper level size...?
 scalar : Float
-scalar = 0.05
+scalar = 0.03
 
 -- acceleration constant
 accel : Float

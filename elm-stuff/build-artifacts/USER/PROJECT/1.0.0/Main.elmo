@@ -10,6 +10,8 @@ Elm.Main.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
@@ -17,38 +19,94 @@ Elm.Main.make = function (_elm) {
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
+   var findAngle = F2(function (o,
+   a) {
+      return A2($Basics.atan2,o,a);
+   });
+   var makeLine = function (p) {
+      return A2($Graphics$Collage.traced,
+      $Graphics$Collage.dashed($Color.lightGrey),
+      p);
+   };
    var view = function (_v0) {
       return function () {
          switch (_v0.ctor)
          {case "_Tuple2":
-            return A2($Html.div,
-              _L.fromArray([]),
-              _L.fromArray([$Html.fromElement($Graphics$Element.show(_v0._0))
-                           ,$Html.fromElement($Graphics$Element.show(_v0._1))
-                           ,$Html.fromElement($Graphics$Element.show(A2($Basics.atan2,
-                           _v0._0,
-                           _v0._1)))]));}
+            return function () {
+                 var collagey = 500;
+                 var halfy = collagey / 2.0;
+                 var collagex = 500;
+                 var halfx = collagex / 2.0;
+                 var relativey = halfy - $Basics.toFloat(_v0._1);
+                 var relativex = $Basics.toFloat(_v0._0) - halfx;
+                 return A2($Html.div,
+                 _L.fromArray([]),
+                 _L.fromArray([$Html.fromElement(A3($Graphics$Collage.collage,
+                              collagex,
+                              collagey,
+                              _L.fromArray([$Graphics$Collage.filled($Color.grey)(A2($Graphics$Collage.rect,
+                                           collagex,
+                                           collagey))
+                                           ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
+                                           {ctor: "_Tuple2"
+                                           ,_0: 0 - halfx
+                                           ,_1: 0},
+                                           {ctor: "_Tuple2"
+                                           ,_0: halfx
+                                           ,_1: 0}))
+                                           ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
+                                           {ctor: "_Tuple2"
+                                           ,_0: 0
+                                           ,_1: 0 - halfy},
+                                           {ctor: "_Tuple2"
+                                           ,_0: 0
+                                           ,_1: halfy}))
+                                           ,$Graphics$Collage.move({ctor: "_Tuple2"
+                                                                   ,_0: relativex
+                                                                   ,_1: relativey})($Graphics$Collage.filled($Color.orange)(A2($Graphics$Collage.ngon,
+                                           6,
+                                           5)))
+                                           ,makeLine(A2($Graphics$Collage.segment,
+                                           {ctor: "_Tuple2",_0: 0,_1: 0},
+                                           {ctor: "_Tuple2"
+                                           ,_0: relativex
+                                           ,_1: 0}))
+                                           ,makeLine(A2($Graphics$Collage.segment,
+                                           {ctor: "_Tuple2",_0: 0,_1: 0},
+                                           {ctor: "_Tuple2"
+                                           ,_0: relativex
+                                           ,_1: relativey}))
+                                           ,makeLine(A2($Graphics$Collage.segment,
+                                           {ctor: "_Tuple2"
+                                           ,_0: relativex
+                                           ,_1: 0},
+                                           {ctor: "_Tuple2"
+                                           ,_0: relativex
+                                           ,_1: relativey}))
+                                           ,$Graphics$Collage.move({ctor: "_Tuple2"
+                                                                   ,_0: 0
+                                                                   ,_1: 0})($Graphics$Collage.outlined($Graphics$Collage.dashed($Color.lightGrey))($Graphics$Collage.circle($Basics.sqrt(Math.pow(relativex,
+                                           2) + Math.pow(relativey,
+                                           2)))))])))
+                              ,$Html.fromElement($Graphics$Element.show(A2($Basics.atan2,
+                              relativey,
+                              relativex)))]));
+              }();}
          _U.badCase($moduleName,
-         "between lines 15 and 20");
+         "between lines 13 and 42");
       }();
    };
+   var clickPos = A2($Signal.sampleOn,
+   $Mouse.clicks,
+   $Mouse.position);
    var main = A2($Signal.map,
    view,
-   A2($Signal.map,
-   function (_v4) {
-      return function () {
-         switch (_v4.ctor)
-         {case "_Tuple2":
-            return {ctor: "_Tuple2"
-                   ,_0: $Basics.toFloat(_v4._0)
-                   ,_1: $Basics.toFloat(_v4._1)};}
-         _U.badCase($moduleName,
-         "on line 8, column 37 to 57");
-      }();
-   },
-   $Mouse.position));
+   clickPos);
    _elm.Main.values = {_op: _op
-                      ,main: main
-                      ,view: view};
+                      ,clickPos: clickPos
+                      ,view: view
+                      ,makeLine: makeLine
+                      ,findAngle: findAngle
+                      ,main: main};
    return _elm.Main.values;
 };

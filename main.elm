@@ -1,21 +1,21 @@
 import Color exposing (..)
 import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
+import Window exposing (..)
 import Mouse
-import Window
 import Time
 
 -- CONSTANTS
 
 -- window w and h
-windowside : Int
-windowside = 700
+-- windowside : Int
+-- windowside = 700
 
 -- canvas scalar
 -- change with window size to maintain
 -- proper level size...?
 scalar : Float
-scalar = 0.03
+scalar = 0.02
 
 -- acceleration constant
 accel : Float
@@ -23,7 +23,7 @@ accel = 0.25 * scalar
 
 -- deceleration constant
 decay : Float
-decay = 0.1 * scalar
+decay = 0.12 * scalar
 
 
 -- SIGNALS & ACTIONS
@@ -42,7 +42,7 @@ model : Signal Model
 model = Signal.foldp update init signals
 
 main : Signal Element
-main = Signal.map render model
+main = Signal.map2 render Window.dimensions model
 
 
 -- UPDATE
@@ -81,10 +81,10 @@ init =
 
 
 -- VIEW
-render : Model -> Element
-render model =
-    collage windowside windowside
-        [ ngon 3 20
+render : (Int, Int) -> Model -> Element
+render (w,h) model =
+    collage w h
+        [ ngon 3 10
             |> filled green
             |> move (fst model.pos, snd model.pos)
         ]

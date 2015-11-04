@@ -49,6 +49,11 @@ main = Signal.map2 view Window.dimensions clickPos
 
 -- need function for finding atan2 angle
 -- for ship rotation.
+-- finding mouse position will 
 relativeAngle : (Float,Float) -> (Float, Float) -> Float
 relativeAngle (shipx, shipy) (mx, my) =
-     
+    let relativex = mx - (toFloat windowW / 2.0)
+        relativey = (toFloat windowH / 2.0)
+    in
+        atan2 ( (relativey - shipy) / (relativex - shipx) )
+        

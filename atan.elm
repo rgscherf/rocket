@@ -46,3 +46,9 @@ makeLine p = traced (dashed lightGrey) p
 
 main : Signal Html
 main = Signal.map2 view Window.dimensions clickPos 
+
+-- need function for finding atan2 angle
+-- for ship rotation.
+relativeAngle : (Float,Float) -> (Float, Float) -> Float
+relativeAngle (shipx, shipy) (mx, my) =
+     

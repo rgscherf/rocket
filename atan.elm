@@ -1,31 +1,31 @@
 import Mouse exposing (..)
+import Window exposing (..)
 import Graphics.Element exposing (..)
 import Graphics.Collage exposing (..)
 import Html exposing (..)
 import Color exposing (..)
-import Html.Attributes exposing (..)
 
 clickPos : Signal (Int,Int)
 clickPos = Signal.sampleOn Mouse.clicks Mouse.position
 
-view : (Int, Int) -> Html
-view (x,y) =
+view : (Int, Int) -> (Int, Int) -> Html
+view (w,h) (x,y) =
     let relativex = toFloat x - halfx
         relativey = halfy - toFloat y
-        collagex = 500
-        collagey = 500
-        halfx = (collagex / 2.0)
-        halfy = (collagey / 2.0)
+        halfx = (toFloat w / 2.0)
+        halfy = (toFloat h / 2.0)
     in
         div
             []
-            [ collage collagex collagey
-                [ rect collagex collagey |> filled grey
+            [ collage w h
+                [ rect (toFloat w) (toFloat h) |> filled grey
                 -- axes
                 , traced defaultLine <| segment (-halfx, 0) (halfx, 0)
                 , traced defaultLine <| segment (0, -halfy) (0, halfy)
                 -- click location
-                , ngon 6 5 |> filled orange |> move (relativex, relativey)
+                , ngon 6 5 
+                    |> filled orange 
+                    |> move (relativex, relativey)
                 -- tracing the triangle
                 , makeLine <| segment (0,0) (relativex, 0)
                 , makeLine <| segment (0,0) (relativex, relativey)
@@ -45,4 +45,4 @@ makeLine : Path -> Form
 makeLine p = traced (dashed lightGrey) p
 
 main : Signal Html
-main = Signal.map view clickPos
+main = Signal.map2 view Window.dimensions clickPos 

@@ -2915,635 +2915,6 @@ Elm.Html.make = function (_elm) {
                       ,menu: menu};
    return _elm.Html.values;
 };
-Elm.Html = Elm.Html || {};
-Elm.Html.Attributes = Elm.Html.Attributes || {};
-Elm.Html.Attributes.make = function (_elm) {
-   "use strict";
-   _elm.Html = _elm.Html || {};
-   _elm.Html.Attributes = _elm.Html.Attributes || {};
-   if (_elm.Html.Attributes.values)
-   return _elm.Html.Attributes.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Html.Attributes",
-   $Basics = Elm.Basics.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Json$Encode = Elm.Json.Encode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
-   $VirtualDom = Elm.VirtualDom.make(_elm);
-   var attribute = $VirtualDom.attribute;
-   var property = $VirtualDom.property;
-   var stringProperty = F2(function (name,
-   string) {
-      return A2(property,
-      name,
-      $Json$Encode.string(string));
-   });
-   var $class = function (name) {
-      return A2(stringProperty,
-      "className",
-      name);
-   };
-   var id = function (name) {
-      return A2(stringProperty,
-      "id",
-      name);
-   };
-   var title = function (name) {
-      return A2(stringProperty,
-      "title",
-      name);
-   };
-   var accesskey = function ($char) {
-      return A2(stringProperty,
-      "accesskey",
-      $String.fromList(_L.fromArray([$char])));
-   };
-   var contextmenu = function (value) {
-      return A2(stringProperty,
-      "contextmenu",
-      value);
-   };
-   var dir = function (value) {
-      return A2(stringProperty,
-      "dir",
-      value);
-   };
-   var draggable = function (value) {
-      return A2(stringProperty,
-      "draggable",
-      value);
-   };
-   var dropzone = function (value) {
-      return A2(stringProperty,
-      "dropzone",
-      value);
-   };
-   var itemprop = function (value) {
-      return A2(stringProperty,
-      "itemprop",
-      value);
-   };
-   var lang = function (value) {
-      return A2(stringProperty,
-      "lang",
-      value);
-   };
-   var tabindex = function (n) {
-      return A2(stringProperty,
-      "tabIndex",
-      $Basics.toString(n));
-   };
-   var charset = function (value) {
-      return A2(stringProperty,
-      "charset",
-      value);
-   };
-   var content = function (value) {
-      return A2(stringProperty,
-      "content",
-      value);
-   };
-   var httpEquiv = function (value) {
-      return A2(stringProperty,
-      "httpEquiv",
-      value);
-   };
-   var language = function (value) {
-      return A2(stringProperty,
-      "language",
-      value);
-   };
-   var src = function (value) {
-      return A2(stringProperty,
-      "src",
-      value);
-   };
-   var height = function (value) {
-      return A2(stringProperty,
-      "height",
-      $Basics.toString(value));
-   };
-   var width = function (value) {
-      return A2(stringProperty,
-      "width",
-      $Basics.toString(value));
-   };
-   var alt = function (value) {
-      return A2(stringProperty,
-      "alt",
-      value);
-   };
-   var preload = function (value) {
-      return A2(stringProperty,
-      "preload",
-      value);
-   };
-   var poster = function (value) {
-      return A2(stringProperty,
-      "poster",
-      value);
-   };
-   var kind = function (value) {
-      return A2(stringProperty,
-      "kind",
-      value);
-   };
-   var srclang = function (value) {
-      return A2(stringProperty,
-      "srclang",
-      value);
-   };
-   var sandbox = function (value) {
-      return A2(stringProperty,
-      "sandbox",
-      value);
-   };
-   var srcdoc = function (value) {
-      return A2(stringProperty,
-      "srcdoc",
-      value);
-   };
-   var type$ = function (value) {
-      return A2(stringProperty,
-      "type",
-      value);
-   };
-   var value = function (value) {
-      return A2(stringProperty,
-      "value",
-      value);
-   };
-   var placeholder = function (value) {
-      return A2(stringProperty,
-      "placeholder",
-      value);
-   };
-   var accept = function (value) {
-      return A2(stringProperty,
-      "accept",
-      value);
-   };
-   var acceptCharset = function (value) {
-      return A2(stringProperty,
-      "acceptCharset",
-      value);
-   };
-   var action = function (value) {
-      return A2(stringProperty,
-      "action",
-      value);
-   };
-   var autocomplete = function (bool) {
-      return A2(stringProperty,
-      "autocomplete",
-      bool ? "on" : "off");
-   };
-   var autosave = function (value) {
-      return A2(stringProperty,
-      "autosave",
-      value);
-   };
-   var enctype = function (value) {
-      return A2(stringProperty,
-      "enctype",
-      value);
-   };
-   var formaction = function (value) {
-      return A2(stringProperty,
-      "formaction",
-      value);
-   };
-   var list = function (value) {
-      return A2(stringProperty,
-      "list",
-      value);
-   };
-   var minlength = function (n) {
-      return A2(stringProperty,
-      "minLength",
-      $Basics.toString(n));
-   };
-   var maxlength = function (n) {
-      return A2(stringProperty,
-      "maxLength",
-      $Basics.toString(n));
-   };
-   var method = function (value) {
-      return A2(stringProperty,
-      "method",
-      value);
-   };
-   var name = function (value) {
-      return A2(stringProperty,
-      "name",
-      value);
-   };
-   var pattern = function (value) {
-      return A2(stringProperty,
-      "pattern",
-      value);
-   };
-   var size = function (n) {
-      return A2(stringProperty,
-      "size",
-      $Basics.toString(n));
-   };
-   var $for = function (value) {
-      return A2(stringProperty,
-      "htmlFor",
-      value);
-   };
-   var form = function (value) {
-      return A2(stringProperty,
-      "form",
-      value);
-   };
-   var max = function (value) {
-      return A2(stringProperty,
-      "max",
-      value);
-   };
-   var min = function (value) {
-      return A2(stringProperty,
-      "min",
-      value);
-   };
-   var step = function (n) {
-      return A2(stringProperty,
-      "step",
-      n);
-   };
-   var cols = function (n) {
-      return A2(stringProperty,
-      "cols",
-      $Basics.toString(n));
-   };
-   var rows = function (n) {
-      return A2(stringProperty,
-      "rows",
-      $Basics.toString(n));
-   };
-   var wrap = function (value) {
-      return A2(stringProperty,
-      "wrap",
-      value);
-   };
-   var usemap = function (value) {
-      return A2(stringProperty,
-      "useMap",
-      value);
-   };
-   var shape = function (value) {
-      return A2(stringProperty,
-      "shape",
-      value);
-   };
-   var coords = function (value) {
-      return A2(stringProperty,
-      "coords",
-      value);
-   };
-   var challenge = function (value) {
-      return A2(stringProperty,
-      "challenge",
-      value);
-   };
-   var keytype = function (value) {
-      return A2(stringProperty,
-      "keytype",
-      value);
-   };
-   var align = function (value) {
-      return A2(stringProperty,
-      "align",
-      value);
-   };
-   var cite = function (value) {
-      return A2(stringProperty,
-      "cite",
-      value);
-   };
-   var href = function (value) {
-      return A2(stringProperty,
-      "href",
-      value);
-   };
-   var target = function (value) {
-      return A2(stringProperty,
-      "target",
-      value);
-   };
-   var downloadAs = function (value) {
-      return A2(stringProperty,
-      "download",
-      value);
-   };
-   var hreflang = function (value) {
-      return A2(stringProperty,
-      "hreflang",
-      value);
-   };
-   var media = function (value) {
-      return A2(stringProperty,
-      "media",
-      value);
-   };
-   var ping = function (value) {
-      return A2(stringProperty,
-      "ping",
-      value);
-   };
-   var rel = function (value) {
-      return A2(stringProperty,
-      "rel",
-      value);
-   };
-   var datetime = function (value) {
-      return A2(stringProperty,
-      "datetime",
-      value);
-   };
-   var pubdate = function (value) {
-      return A2(stringProperty,
-      "pubdate",
-      value);
-   };
-   var start = function (n) {
-      return A2(stringProperty,
-      "start",
-      $Basics.toString(n));
-   };
-   var colspan = function (n) {
-      return A2(stringProperty,
-      "colSpan",
-      $Basics.toString(n));
-   };
-   var headers = function (value) {
-      return A2(stringProperty,
-      "headers",
-      value);
-   };
-   var rowspan = function (n) {
-      return A2(stringProperty,
-      "rowSpan",
-      $Basics.toString(n));
-   };
-   var scope = function (value) {
-      return A2(stringProperty,
-      "scope",
-      value);
-   };
-   var manifest = function (value) {
-      return A2(stringProperty,
-      "manifest",
-      value);
-   };
-   var boolProperty = F2(function (name,
-   bool) {
-      return A2(property,
-      name,
-      $Json$Encode.bool(bool));
-   });
-   var hidden = function (bool) {
-      return A2(boolProperty,
-      "hidden",
-      bool);
-   };
-   var contenteditable = function (bool) {
-      return A2(boolProperty,
-      "contentEditable",
-      bool);
-   };
-   var spellcheck = function (bool) {
-      return A2(boolProperty,
-      "spellcheck",
-      bool);
-   };
-   var async = function (bool) {
-      return A2(boolProperty,
-      "async",
-      bool);
-   };
-   var defer = function (bool) {
-      return A2(boolProperty,
-      "defer",
-      bool);
-   };
-   var scoped = function (bool) {
-      return A2(boolProperty,
-      "scoped",
-      bool);
-   };
-   var autoplay = function (bool) {
-      return A2(boolProperty,
-      "autoplay",
-      bool);
-   };
-   var controls = function (bool) {
-      return A2(boolProperty,
-      "controls",
-      bool);
-   };
-   var loop = function (bool) {
-      return A2(boolProperty,
-      "loop",
-      bool);
-   };
-   var $default = function (bool) {
-      return A2(boolProperty,
-      "default",
-      bool);
-   };
-   var seamless = function (bool) {
-      return A2(boolProperty,
-      "seamless",
-      bool);
-   };
-   var checked = function (bool) {
-      return A2(boolProperty,
-      "checked",
-      bool);
-   };
-   var selected = function (bool) {
-      return A2(boolProperty,
-      "selected",
-      bool);
-   };
-   var autofocus = function (bool) {
-      return A2(boolProperty,
-      "autofocus",
-      bool);
-   };
-   var disabled = function (bool) {
-      return A2(boolProperty,
-      "disabled",
-      bool);
-   };
-   var multiple = function (bool) {
-      return A2(boolProperty,
-      "multiple",
-      bool);
-   };
-   var novalidate = function (bool) {
-      return A2(boolProperty,
-      "noValidate",
-      bool);
-   };
-   var readonly = function (bool) {
-      return A2(boolProperty,
-      "readOnly",
-      bool);
-   };
-   var required = function (bool) {
-      return A2(boolProperty,
-      "required",
-      bool);
-   };
-   var ismap = function (value) {
-      return A2(boolProperty,
-      "isMap",
-      value);
-   };
-   var download = function (bool) {
-      return A2(boolProperty,
-      "download",
-      bool);
-   };
-   var reversed = function (bool) {
-      return A2(boolProperty,
-      "reversed",
-      bool);
-   };
-   var classList = function (list) {
-      return $class($String.join(" ")($List.map($Basics.fst)($List.filter($Basics.snd)(list))));
-   };
-   var style = function (props) {
-      return property("style")($Json$Encode.object($List.map(function (_v0) {
-         return function () {
-            switch (_v0.ctor)
-            {case "_Tuple2":
-               return {ctor: "_Tuple2"
-                      ,_0: _v0._0
-                      ,_1: $Json$Encode.string(_v0._1)};}
-            _U.badCase($moduleName,
-            "on line 156, column 35 to 57");
-         }();
-      })(props)));
-   };
-   var key = function (k) {
-      return A2(stringProperty,
-      "key",
-      k);
-   };
-   _elm.Html.Attributes.values = {_op: _op
-                                 ,key: key
-                                 ,style: style
-                                 ,$class: $class
-                                 ,classList: classList
-                                 ,id: id
-                                 ,title: title
-                                 ,hidden: hidden
-                                 ,type$: type$
-                                 ,value: value
-                                 ,checked: checked
-                                 ,placeholder: placeholder
-                                 ,selected: selected
-                                 ,accept: accept
-                                 ,acceptCharset: acceptCharset
-                                 ,action: action
-                                 ,autocomplete: autocomplete
-                                 ,autofocus: autofocus
-                                 ,autosave: autosave
-                                 ,disabled: disabled
-                                 ,enctype: enctype
-                                 ,formaction: formaction
-                                 ,list: list
-                                 ,maxlength: maxlength
-                                 ,minlength: minlength
-                                 ,method: method
-                                 ,multiple: multiple
-                                 ,name: name
-                                 ,novalidate: novalidate
-                                 ,pattern: pattern
-                                 ,readonly: readonly
-                                 ,required: required
-                                 ,size: size
-                                 ,$for: $for
-                                 ,form: form
-                                 ,max: max
-                                 ,min: min
-                                 ,step: step
-                                 ,cols: cols
-                                 ,rows: rows
-                                 ,wrap: wrap
-                                 ,href: href
-                                 ,target: target
-                                 ,download: download
-                                 ,downloadAs: downloadAs
-                                 ,hreflang: hreflang
-                                 ,media: media
-                                 ,ping: ping
-                                 ,rel: rel
-                                 ,ismap: ismap
-                                 ,usemap: usemap
-                                 ,shape: shape
-                                 ,coords: coords
-                                 ,src: src
-                                 ,height: height
-                                 ,width: width
-                                 ,alt: alt
-                                 ,autoplay: autoplay
-                                 ,controls: controls
-                                 ,loop: loop
-                                 ,preload: preload
-                                 ,poster: poster
-                                 ,$default: $default
-                                 ,kind: kind
-                                 ,srclang: srclang
-                                 ,sandbox: sandbox
-                                 ,seamless: seamless
-                                 ,srcdoc: srcdoc
-                                 ,reversed: reversed
-                                 ,start: start
-                                 ,align: align
-                                 ,colspan: colspan
-                                 ,rowspan: rowspan
-                                 ,headers: headers
-                                 ,scope: scope
-                                 ,async: async
-                                 ,charset: charset
-                                 ,content: content
-                                 ,defer: defer
-                                 ,httpEquiv: httpEquiv
-                                 ,language: language
-                                 ,scoped: scoped
-                                 ,accesskey: accesskey
-                                 ,contenteditable: contenteditable
-                                 ,contextmenu: contextmenu
-                                 ,dir: dir
-                                 ,draggable: draggable
-                                 ,dropzone: dropzone
-                                 ,itemprop: itemprop
-                                 ,lang: lang
-                                 ,spellcheck: spellcheck
-                                 ,tabindex: tabindex
-                                 ,challenge: challenge
-                                 ,keytype: keytype
-                                 ,cite: cite
-                                 ,datetime: datetime
-                                 ,pubdate: pubdate
-                                 ,manifest: manifest
-                                 ,property: property
-                                 ,attribute: attribute};
-   return _elm.Html.Attributes.values;
-};
 Elm.Json = Elm.Json || {};
 Elm.Json.Decode = Elm.Json.Decode || {};
 Elm.Json.Decode.make = function (_elm) {
@@ -4067,95 +3438,101 @@ Elm.Main.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var findAngle = F2(function (o,
-   a) {
-      return A2($Basics.atan2,o,a);
-   });
+   $Signal = Elm.Signal.make(_elm),
+   $Window = Elm.Window.make(_elm);
    var makeLine = function (p) {
       return A2($Graphics$Collage.traced,
       $Graphics$Collage.dashed($Color.lightGrey),
       p);
    };
-   var view = function (_v0) {
+   var view = F2(function (_v0,
+   _v1) {
       return function () {
-         switch (_v0.ctor)
+         switch (_v1.ctor)
          {case "_Tuple2":
             return function () {
-                 var collagey = 500;
-                 var halfy = collagey / 2.0;
-                 var collagex = 500;
-                 var halfx = collagex / 2.0;
-                 var relativey = halfy - $Basics.toFloat(_v0._1);
-                 var relativex = $Basics.toFloat(_v0._0) - halfx;
-                 return A2($Html.div,
-                 _L.fromArray([]),
-                 _L.fromArray([$Html.fromElement(A3($Graphics$Collage.collage,
-                              collagex,
-                              collagey,
-                              _L.fromArray([$Graphics$Collage.filled($Color.grey)(A2($Graphics$Collage.rect,
-                                           collagex,
-                                           collagey))
-                                           ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2"
-                                           ,_0: 0 - halfx
-                                           ,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: halfx
-                                           ,_1: 0}))
-                                           ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2"
-                                           ,_0: 0
-                                           ,_1: 0 - halfy},
-                                           {ctor: "_Tuple2"
-                                           ,_0: 0
-                                           ,_1: halfy}))
-                                           ,$Graphics$Collage.move({ctor: "_Tuple2"
-                                                                   ,_0: relativex
-                                                                   ,_1: relativey})($Graphics$Collage.filled($Color.orange)(A2($Graphics$Collage.ngon,
-                                           6,
-                                           5)))
-                                           ,makeLine(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2",_0: 0,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: 0}))
-                                           ,makeLine(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2",_0: 0,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: relativey}))
-                                           ,makeLine(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: relativey}))
-                                           ,$Graphics$Collage.move({ctor: "_Tuple2"
-                                                                   ,_0: 0
-                                                                   ,_1: 0})($Graphics$Collage.outlined($Graphics$Collage.dashed($Color.lightGrey))($Graphics$Collage.circle($Basics.sqrt(Math.pow(relativex,
-                                           2) + Math.pow(relativey,
-                                           2)))))])))
-                              ,$Html.fromElement($Graphics$Element.show(A2($Basics.atan2,
-                              relativey,
-                              relativex)))]));
+                 switch (_v0.ctor)
+                 {case "_Tuple2":
+                    return function () {
+                         var halfy = $Basics.toFloat(_v0._1) / 2.0;
+                         var halfx = $Basics.toFloat(_v0._0) / 2.0;
+                         var relativey = halfy - $Basics.toFloat(_v1._1);
+                         var relativex = $Basics.toFloat(_v1._0) - halfx;
+                         return A2($Html.div,
+                         _L.fromArray([]),
+                         _L.fromArray([$Html.fromElement(A3($Graphics$Collage.collage,
+                                      _v0._0,
+                                      _v0._1,
+                                      _L.fromArray([$Graphics$Collage.filled($Color.grey)(A2($Graphics$Collage.rect,
+                                                   $Basics.toFloat(_v0._0),
+                                                   $Basics.toFloat(_v0._1)))
+                                                   ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: 0 - halfx
+                                                   ,_1: 0},
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: halfx
+                                                   ,_1: 0}))
+                                                   ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: 0
+                                                   ,_1: 0 - halfy},
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: 0
+                                                   ,_1: halfy}))
+                                                   ,$Graphics$Collage.move({ctor: "_Tuple2"
+                                                                           ,_0: relativex
+                                                                           ,_1: relativey})($Graphics$Collage.filled($Color.orange)(A2($Graphics$Collage.ngon,
+                                                   6,
+                                                   5)))
+                                                   ,makeLine(A2($Graphics$Collage.segment,
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: 0
+                                                   ,_1: 0},
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: relativex
+                                                   ,_1: 0}))
+                                                   ,makeLine(A2($Graphics$Collage.segment,
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: 0
+                                                   ,_1: 0},
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: relativex
+                                                   ,_1: relativey}))
+                                                   ,makeLine(A2($Graphics$Collage.segment,
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: relativex
+                                                   ,_1: 0},
+                                                   {ctor: "_Tuple2"
+                                                   ,_0: relativex
+                                                   ,_1: relativey}))
+                                                   ,$Graphics$Collage.move({ctor: "_Tuple2"
+                                                                           ,_0: 0
+                                                                           ,_1: 0})($Graphics$Collage.outlined($Graphics$Collage.dashed($Color.lightGrey))($Graphics$Collage.circle($Basics.sqrt(Math.pow(relativex,
+                                                   2) + Math.pow(relativey,
+                                                   2)))))])))
+                                      ,$Html.fromElement($Graphics$Element.show(A2($Basics.atan2,
+                                      relativey,
+                                      relativex)))]));
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 13 and 42");
               }();}
          _U.badCase($moduleName,
          "between lines 13 and 42");
       }();
-   };
+   });
    var clickPos = A2($Signal.sampleOn,
    $Mouse.clicks,
    $Mouse.position);
-   var main = A2($Signal.map,
+   var main = A3($Signal.map2,
    view,
+   $Window.dimensions,
    clickPos);
    _elm.Main.values = {_op: _op
                       ,clickPos: clickPos
                       ,view: view
                       ,makeLine: makeLine
-                      ,findAngle: findAngle
                       ,main: main};
    return _elm.Main.values;
 };
@@ -12010,6 +11387,75 @@ Elm.Native.VirtualDom.make = function(elm)
 
 },{"virtual-dom/vdom/create-element":6,"virtual-dom/vdom/patch":9,"virtual-dom/vnode/is-vhook":13,"virtual-dom/vnode/vnode":18,"virtual-dom/vnode/vtext":20,"virtual-dom/vtree/diff":22}]},{},[23]);
 
+Elm.Native = Elm.Native || {};
+Elm.Native.Window = {};
+Elm.Native.Window.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Window = localRuntime.Native.Window || {};
+	if (localRuntime.Native.Window.values)
+	{
+		return localRuntime.Native.Window.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
+
+
+	function getWidth()
+	{
+		return localRuntime.node.clientWidth;
+	}
+
+
+	function getHeight()
+	{
+		if (localRuntime.isFullscreen())
+		{
+			return window.innerHeight;
+		}
+		return localRuntime.node.clientHeight;
+	}
+
+
+	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
+
+
+	function resizeIfNeeded()
+	{
+		// Do not trigger event if the dimensions have not changed.
+		// This should be most of the time.
+		var w = getWidth();
+		var h = getHeight();
+		if (dimensions.value._0 === w && dimensions.value._1 === h)
+		{
+			return;
+		}
+
+		setTimeout(function () {
+			// Check again to see if the dimensions have changed.
+			// It is conceivable that the dimensions have changed
+			// again while some other event was being processed.
+			var w = getWidth();
+			var h = getHeight();
+			if (dimensions.value._0 === w && dimensions.value._1 === h)
+			{
+				return;
+			}
+			localRuntime.notify(dimensions.id, Tuple2(w,h));
+		}, 0);
+	}
+
+
+	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
+
+
+	return localRuntime.Native.Window.values = {
+		dimensions: dimensions,
+		resizeIfNeeded: resizeIfNeeded
+	};
+};
+
 Elm.Result = Elm.Result || {};
 Elm.Result.make = function (_elm) {
    "use strict";
@@ -12941,4 +12387,31 @@ Elm.VirtualDom.make = function (_elm) {
                             ,lazy3: lazy3
                             ,Options: Options};
    return _elm.VirtualDom.values;
+};
+Elm.Window = Elm.Window || {};
+Elm.Window.make = function (_elm) {
+   "use strict";
+   _elm.Window = _elm.Window || {};
+   if (_elm.Window.values)
+   return _elm.Window.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Window",
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Window = Elm.Native.Window.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var dimensions = $Native$Window.dimensions;
+   var width = A2($Signal.map,
+   $Basics.fst,
+   dimensions);
+   var height = A2($Signal.map,
+   $Basics.snd,
+   dimensions);
+   _elm.Window.values = {_op: _op
+                        ,dimensions: dimensions
+                        ,width: width
+                        ,height: height};
+   return _elm.Window.values;
 };

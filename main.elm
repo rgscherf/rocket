@@ -19,16 +19,16 @@ windowH = 600
 -- canvas scalar
 -- change with window size to maintain
 -- proper level size...?
-scalar : Float
-scalar = 0.015
+-- scalar : Float
+-- scalar = 15
 
 -- acceleration constant
 accel : Float
-accel = 0.25 * scalar
+accel = 0.25 
 
 -- deceleration constant
 decay : Float
-decay = 0.12 * scalar
+decay = 0.12
 
 
 --------------------
@@ -78,7 +78,9 @@ update action model =
 velocityCalc : Model -> (Float, Float)
 velocityCalc model =
     if model.thrusting
-        then ((fst model.vel) + accel, (snd model.vel) + accel)
+        then ( accel * (fst <| thrustVelocity model)
+             , accel * (snd <| thrustVelocity model)
+             )
         else (max 0 ((fst model.vel) - decay), max 0 ((snd model.vel) - decay))
 
 relativeAngle : (Float, Float) -> (Float, Float) -> Float
@@ -125,3 +127,18 @@ render model =
         , toForm (show model)
         ]
 
+thrustVelocity : Model -> (Float, Float)
+thrustVelocity model =
+    let angle = relativeAngle model.pos model.target
+        halfpi = pi / 2
+        nhalfpi = -pi / 2
+    in 
+        if  | angle > 0 && angle < halfpi ->
+                (angle / halfpi, 1 - (angle/halfpi))
+            | angle > halfpi ->
+                ((angle - halfpi) / halfpi, 1 - ((angle - halfpi) / halfpi))
+            | angle < 0 && angle > nhalfpi ->
+                (angle / halfpi, 1 - (angle / halfpi))
+            | angle < nhalfpi ->
+                ((angle + halfpi) / halfpi, 1 - ((angle + halfpi) / halfpi))
+            

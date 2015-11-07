@@ -11,7 +11,7 @@ import Time
 
 -- window w and h
 windowW : Int
-windowW = 700
+windowW = 1500
 
 windowH : Int
 windowH = 600
@@ -24,11 +24,11 @@ windowH = 600
 
 -- acceleration constant
 accel : Float
-accel = 0.25 
+accel = 4 
 
 -- deceleration constant
 decay : Float
-decay = 0.12
+decay = 0.01
 
 
 --------------------
@@ -39,7 +39,7 @@ signals : Signal Action
 signals = Signal.mergeMany
     [ Signal.map Target Mouse.position
     , Signal.map Thrust Mouse.isDown
-    , Signal.map Tick (Time.fps 60)
+    , Signal.map Tick (Time.fps 30)
     ]
 
 type Action
@@ -73,15 +73,20 @@ update action model =
                          , snd model.pos + snd velocity
                          )
                 , vel <- velocity 
+                , lastAngle <- relativeAngle model.pos model.target
                 }
 
 velocityCalc : Model -> (Float, Float)
 velocityCalc model =
-    if model.thrusting
-        then ( accel * (fst <| thrustVelocity model)
-             , accel * (snd <| thrustVelocity model)
-             )
-        else (max 0 ((fst model.vel) - decay), max 0 ((snd model.vel) - decay))
+    let velocity = thrustVelocity model
+    in
+        if model.thrusting
+            then ( accel * (fst <| velocity)
+                 , accel * (snd <| velocity)
+                 )
+            else ( max 0 ((fst model.vel) - decay)
+                 , max 0 ((snd model.vel) - decay)
+                 )
 
 relativeAngle : (Float, Float) -> (Float, Float) -> Float
 relativeAngle (shipx, shipy) (mx, my) =
@@ -98,6 +103,7 @@ type alias Model =
     , target : (Float, Float)
     , viewport : (Int, Int)
     , thrusting : Bool
+    , lastAngle : Float
     }
 
 init : Model
@@ -107,6 +113,7 @@ init =
     , target = (0,0)
     , viewport = (windowW, windowH)
     , thrusting = False
+    , lastAngle = 0
     }
 
 model : Signal Model
@@ -130,15 +137,16 @@ render model =
 thrustVelocity : Model -> (Float, Float)
 thrustVelocity model =
     let angle = relativeAngle model.pos model.target
-        halfpi = pi / 2
-        nhalfpi = -pi / 2
-    in 
-        if  | angle > 0 && angle < halfpi ->
-                (angle / halfpi, 1 - (angle/halfpi))
-            | angle > halfpi ->
-                ((angle - halfpi) / halfpi, 1 - ((angle - halfpi) / halfpi))
-            | angle < 0 && angle > nhalfpi ->
-                (angle / halfpi, 1 - (angle / halfpi))
-            | angle < nhalfpi ->
-                ((angle + halfpi) / halfpi, 1 - ((angle + halfpi) / halfpi))
-            
+    in (getVelX angle, getVelY angle)
+
+getVelX : Float -> Float
+getVelX angle =
+    (((abs angle / pi) * 2) - 1 ) * (-1)
+
+getVelY : Float -> Float
+getVelY angle =
+   let a = abs angle
+       halfpi = pi / 2
+   in if a > halfpi
+        then (((a - halfpi) / halfpi) * (-2)) + 1
+        else ((a / halfpi) * (-2)) + 1

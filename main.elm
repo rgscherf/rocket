@@ -61,7 +61,6 @@ update action model =
                       | vel <- addVelocity model.vel delta
                       , angle <- newAngle
                       }
-                |> recordTarget delta
         Tick _ ->
             let xframeDecay = if fst model.vel > 0
                               then decay * (-1)
@@ -76,9 +75,6 @@ update action model =
                                )
                       }
 
-recordTarget : (Int, Int) -> Model -> Model
-recordTarget (x,y) model = {model | target <- (x,y)}
-
 changePos : Model -> Model
 changePos model =
     { model
@@ -89,7 +85,12 @@ changePos model =
 
 addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
 addVelocity (mx, my) (x, y) =
-   (mx + toFloat x, my + toFloat y)
+    let calcx = mx + toFloat x
+        calcy = my + toFloat y
+        maxvel = 5
+    in ( max (negate maxvel) (min calcx maxvel)
+       , max (negate maxvel) (min calcy maxvel)
+       )
 
 
 --------------------
@@ -99,7 +100,6 @@ addVelocity (mx, my) (x, y) =
 type alias Model =
     { pos : (Float, Float)
     , vel : (Float, Float)
-    , target : (Int, Int)
     , angle : Float
     , viewport : (Int, Int)
     }
@@ -108,7 +108,6 @@ init : Model
 init =
     { pos = (0,0)
     , vel = (0,0)
-    , target = (0,0)
     , angle = 0
     , viewport = (windowW, windowH)
     }
@@ -145,3 +144,25 @@ relativeAngle motion =
         (1,-1)  ->  negate <| pi * 0.25
         (-1,1)  -> pi * 0.75
         otherwise -> 0
+
+-- COLLISION CALCULATIONS
+-- collision library represents shapes as lists of vertices
+-- so we need to be able to convert our Forms to that.
+
+triRadius : Int -> Float
+triRadius length = (/) 2 <| sqrt ((length ^ 2) + ((length/2) ^ 2))
+
+rotatedPoint : Float -> (Float,Float) -> Float
+rotatedPoint radius (x,y) angle =
+    let newx = (+) x <| cos angle * radius
+        newy = (+) y <| sin angle * radius
+    in (newx, newy)
+
+-- given a triangle's side length and location
+-- give back a list of locations of its points
+triPoints : Int -> Float -> (Float, Float) -> List (Float, Float)
+triPoints length angle (x,y) =
+    let radius = triRadius length
+    in map (rotatedPoint radius (x,y)) 
+        [angle, angle + (pi * 2/3), angle + (pi * 4/3)] 
+

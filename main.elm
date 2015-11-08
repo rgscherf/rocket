@@ -3,6 +3,7 @@ import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
 import Window exposing (..)
 import Mouse
+import Keyboard exposing (..)
 import Time
 
 --------------------
@@ -11,24 +12,18 @@ import Time
 
 -- window w and h
 windowW : Int
-windowW = 1500
+windowW = 1200
 
 windowH : Int
 windowH = 600
 
--- canvas scalar
--- change with window size to maintain
--- proper level size...?
--- scalar : Float
--- scalar = 15
-
 -- acceleration constant
 accel : Float
-accel = 4 
+accel = 1.5 
 
 -- deceleration constant
 decay : Float
-decay = 0.01
+decay = 0.02
 
 
 --------------------
@@ -37,14 +32,13 @@ decay = 0.01
 
 signals : Signal Action
 signals = Signal.mergeMany
-    [ Signal.map Target Mouse.position
-    , Signal.map Thrust Mouse.isDown
-    , Signal.map Tick (Time.fps 30)
+    [ Signal.map (\{x,y} -> Thrust (x,y)) 
+        (Signal.sampleOn (Time.fps 15) Keyboard.wasd)
+    , Signal.map Tick (Time.fps 60)
     ]
 
 type Action
-    = Target (Int,Int)
-    | Thrust Bool
+    = Thrust (Int,Int)
     | Tick Float
 
 main : Signal Element
@@ -58,39 +52,44 @@ main = Signal.map render model
 update : Action -> Model -> Model
 update action model =
     case action of
-        Target (x,y) ->
-            let rmx = toFloat x - (toFloat (fst model.viewport) / 2.0)
-                rmy = (toFloat (snd model.viewport) / 2.0) - toFloat y
+        Thrust delta ->
+            let newAngle = if delta /= (0,0)
+                           then relativeAngle delta
+                           else model.angle
             in
-                { model | target <- (rmx, rmy) }
-        Thrust b ->
-            { model | thrusting <- b }
+            changePos { model 
+                      | vel <- addVelocity model.vel delta
+                      , angle <- newAngle
+                      }
+                |> recordTarget delta
         Tick _ ->
-            let velocity = velocityCalc model
+            let xframeDecay = if fst model.vel > 0
+                              then decay * (-1)
+                              else decay
+                yframeDecay = if snd model.vel > 0
+                              then decay * (-1)
+                              else decay
             in
-                { model
-                | pos <- ( fst model.pos + fst velocity
-                         , snd model.pos + snd velocity
-                         )
-                , vel <- velocity 
-                , lastAngle <- relativeAngle model.pos model.target
-                }
+            changePos { model 
+                      | vel <- ( (fst model.vel) + xframeDecay
+                               , (snd model.vel) + yframeDecay
+                               )
+                      }
 
-velocityCalc : Model -> (Float, Float)
-velocityCalc model =
-    let velocity = thrustVelocity model
-    in
-        if model.thrusting
-            then ( accel * (fst <| velocity)
-                 , accel * (snd <| velocity)
-                 )
-            else ( max 0 ((fst model.vel) - decay)
-                 , max 0 ((snd model.vel) - decay)
-                 )
+recordTarget : (Int, Int) -> Model -> Model
+recordTarget (x,y) model = {model | target <- (x,y)}
 
-relativeAngle : (Float, Float) -> (Float, Float) -> Float
-relativeAngle (shipx, shipy) (mx, my) =
-    atan2 (my - shipy) (mx - shipx)
+changePos : Model -> Model
+changePos model =
+    { model
+    | pos <- ( fst model.pos + fst model.vel
+             , snd model.pos + snd model.vel
+             )
+    }
+
+addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
+addVelocity (mx, my) (x, y) =
+   (mx + toFloat x, my + toFloat y)
 
 
 --------------------
@@ -100,20 +99,18 @@ relativeAngle (shipx, shipy) (mx, my) =
 type alias Model =
     { pos : (Float, Float)
     , vel : (Float, Float)
-    , target : (Float, Float)
+    , target : (Int, Int)
+    , angle : Float
     , viewport : (Int, Int)
-    , thrusting : Bool
-    , lastAngle : Float
     }
 
 init : Model
 init =
-    { pos = (-250,-250)
+    { pos = (0,0)
     , vel = (0,0)
     , target = (0,0)
+    , angle = 0
     , viewport = (windowW, windowH)
-    , thrusting = False
-    , lastAngle = 0
     }
 
 model : Signal Model
@@ -127,26 +124,24 @@ model = Signal.foldp update init signals
 render : Model -> Element
 render model =
     collage windowW windowH 
-        [ ngon 3 10
+        [ rect (toFloat windowW) (toFloat windowH)
+            |> filled lightGrey
+        , ngon 3 10
             |> filled green
-            |> rotate (relativeAngle model.pos model.target)
+            |> rotate model.angle
             |> move (fst model.pos, snd model.pos)
-        , toForm (show model)
+        -- , toForm (show model)
         ]
 
-thrustVelocity : Model -> (Float, Float)
-thrustVelocity model =
-    let angle = relativeAngle model.pos model.target
-    in (getVelX angle, getVelY angle)
-
-getVelX : Float -> Float
-getVelX angle =
-    (((abs angle / pi) * 2) - 1 ) * (-1)
-
-getVelY : Float -> Float
-getVelY angle =
-   let a = abs angle
-       halfpi = pi / 2
-   in if a > halfpi
-        then (((a - halfpi) / halfpi) * (-2)) + 1
-        else ((a / halfpi) * (-2)) + 1
+relativeAngle : (Int,Int) -> Float
+relativeAngle motion =
+    case motion of
+        (0,1)   -> pi / 2
+        (0,-1)  -> negate <| pi / 2
+        (1,0)   -> 0
+        (-1,0)  -> pi
+        (1,1)   -> pi * 0.25
+        (-1,-1) -> negate <| pi * 0.75
+        (1,-1)  ->  negate <| pi * 0.25
+        (-1,1)  -> pi * 0.75
+        otherwise -> 0

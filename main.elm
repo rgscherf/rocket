@@ -5,6 +5,10 @@ import Window exposing (..)
 import Mouse
 import Keyboard exposing (..)
 import Time
+-- TODO: elm-package install johnpmayer/elm-linear-algebra -y
+-- in order to get Math
+import Math.Vector2 exposing (vec2)
+import Collision2D exposing (..)
 
 --------------------
 -- CONSTANTS
@@ -24,6 +28,9 @@ accel = 1.5
 -- deceleration constant
 decay : Float
 decay = 0.02
+
+playerSize : Float
+playerSize = 20
 
 
 --------------------
@@ -77,11 +84,25 @@ update action model =
 
 changePos : Model -> Model
 changePos model =
-    { model
-    | pos <- ( fst model.pos + fst model.vel
-             , snd model.pos + snd model.vel
-             )
-    }
+    let newPos = ( fst model.pos + fst model.vel
+                 , snd model.pos + snd model.vel
+                 )
+    in
+        { model
+        | pos <- newPos
+        , blocks <- List.map 
+            (collideBlock model.playerSize model.angle newPos model.vel) 
+            model.blocks
+        }
+
+collideBlock : Float -> Float -> (Float,Float) -> (Float,Float) -> Block -> Block
+collideBlock length angle (x,y) (vx,vy) b =
+    let tripoints = triPoints length angle (x,y)
+        rectpoints = rectPoints block.length block.pos
+    in if any ((List.map (flip isInside (fromVectors triPoints)) rectPoints)
+              ++ (List.map (flip isInside (fromVectors rectPoints)) triPoints))
+       then {b | color <- red}
+       else b
 
 addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
 addVelocity (mx, my) (x, y) =
@@ -102,6 +123,8 @@ type alias Model =
     , vel : (Float, Float)
     , angle : Float
     , viewport : (Int, Int)
+    , length : Float
+    , blocks : List Block
     }
 
 init : Model
@@ -110,6 +133,9 @@ init =
     , vel = (0,0)
     , angle = 0
     , viewport = (windowW, windowH)
+    , length = playerSize
+    , blocks = [ Block 20 (50,50) purple
+               ]
     }
 
 model : Signal Model
@@ -117,21 +143,38 @@ model = Signal.foldp update init signals
 
 
 --------------------
+-- OBSTACLES
+--------------------
+
+type alias Block =
+    { length : Float
+    , pos : (Float, Float)
+    , color : Color
+    } 
+    
+--------------------
 -- VIEW
 --------------------
 
 render : Model -> Element
 render model =
     collage windowW windowH 
+    (
         [ rect (toFloat windowW) (toFloat windowH)
             |> filled lightGrey
-        , ngon 3 10
+        , ngon 3 model.playerSize
             |> filled green
             |> rotate model.angle
             |> move (fst model.pos, snd model.pos)
-        -- , toForm (show model)
         ]
+        ++ List.map drawBlock model.blocks
+    )
 
+drawBlock : Block -> Form
+drawBlock b = rect b.length b.length
+                |> filled purple
+                |> move b.pos
+                
 relativeAngle : (Int,Int) -> Float
 relativeAngle motion =
     case motion of
@@ -149,20 +192,38 @@ relativeAngle motion =
 -- collision library represents shapes as lists of vertices
 -- so we need to be able to convert our Forms to that.
 
-triRadius : Int -> Float
-triRadius length = (/) 2 <| sqrt ((length ^ 2) + ((length/2) ^ 2))
-
-rotatedPoint : Float -> (Float,Float) -> Float
+-- for a circle of given radius, find point along the circle
+-- at a given angle
+rotatedPoint : Float -> (Float,Float) -> Float -> Vec2
 rotatedPoint radius (x,y) angle =
     let newx = (+) x <| cos angle * radius
         newy = (+) y <| sin angle * radius
-    in (newx, newy)
+    in vec2 newx newy
 
+-- TRIANGLE FUNCTIONS
+-- get radius of triangle
+triRadius : Float -> Float
+triRadius length = flip (/) 2 <| sqrt ((length ^ 2) + ((length/2) ^ 2))
+
+-- list constituent vertices of rectangle
 -- given a triangle's side length and location
 -- give back a list of locations of its points
-triPoints : Int -> Float -> (Float, Float) -> List (Float, Float)
+triPoints : Float -> Float -> (Float, Float) -> List Vec2
 triPoints length angle (x,y) =
     let radius = triRadius length
-    in map (rotatedPoint radius (x,y)) 
+    in List.map (rotatedPoint radius (x,y)) 
         [angle, angle + (pi * 2/3), angle + (pi * 4/3)] 
 
+-- RECT FUNCTIONS
+-- get radius of rectangle
+rectRadius : Float -> Float
+rectRadius length = 
+    let half = length / 2
+    in sqrt <| 2 * (half^2)
+
+-- list constituent vertices of rectangle
+rectPoints : Float -> (Float,Float) -> List Vec2
+rectPoints length (x,y) =
+    let radius = rectRadius length
+    in List.map (rotatedPoint radius (x,y))
+        [0, pi/2, pi, -pi/2]

@@ -5,32 +5,13 @@ import Window exposing (..)
 import Mouse
 import Keyboard exposing (..)
 import Time
--- TODO: elm-package install johnpmayer/elm-linear-algebra -y
--- in order to get Math
-import Math.Vector2 exposing (vec2)
+import Math.Vector2 exposing (Vec2)
 import Collision2D exposing (..)
+import Debug exposing (..)
 
---------------------
--- CONSTANTS
---------------------
+import RocketGeometry exposing (..)
+import RocketConstants exposing (..)
 
--- window w and h
-windowW : Int
-windowW = 1200
-
-windowH : Int
-windowH = 600
-
--- acceleration constant
-accel : Float
-accel = 1.5 
-
--- deceleration constant
-decay : Float
-decay = 0.02
-
-playerSize : Float
-playerSize = 20
 
 
 --------------------
@@ -65,7 +46,7 @@ update action model =
                            else model.angle
             in
             changePos { model 
-                      | vel <- addVelocity model.vel delta
+                      | vel <- checkCollision model <| addVelocity model.vel delta
                       , angle <- newAngle
                       }
         Tick _ ->
@@ -75,12 +56,10 @@ update action model =
                 yframeDecay = if snd model.vel > 0
                               then decay * (-1)
                               else decay
-            in
-            changePos { model 
-                      | vel <- ( (fst model.vel) + xframeDecay
-                               , (snd model.vel) + yframeDecay
-                               )
-                      }
+                newVel = ( (fst model.vel) + xframeDecay
+                         , (snd model.vel) + yframeDecay
+                         )
+            in changePos { model | vel <- checkCollision model newVel }
 
 changePos : Model -> Model
 changePos model =
@@ -90,19 +69,35 @@ changePos model =
     in
         { model
         | pos <- newPos
-        , blocks <- List.map 
-            (collideBlock model.playerSize model.angle newPos model.vel) 
-            model.blocks
+        -- , blocks <- List.map 
+            -- (collideBlock model.playerSize model.angle newPos) 
+            -- model.blocks
         }
 
-collideBlock : Float -> Float -> (Float,Float) -> (Float,Float) -> Block -> Block
-collideBlock length angle (x,y) (vx,vy) b =
-    let tripoints = triPoints length angle (x,y)
-        rectpoints = rectPoints block.length block.pos
-    in if any ((List.map (flip isInside (fromVectors triPoints)) rectPoints)
-              ++ (List.map (flip isInside (fromVectors rectPoints)) triPoints))
-       then {b | color <- red}
-       else b
+-- every step, check position against internal list of blocks
+-- if any collision, reverse velocity
+checkCollision : Model -> (Float, Float) -> (Float,Float)
+checkCollision model vel =
+    let collided = List.any (oneCollide <| triToPoints model.playerSize model.angle model.pos) model.blocks
+    in if collided then flipVel vel else vel
+
+oneCollide : List Vec2 -> Block -> Bool
+oneCollide ppoints b =
+    let bpoints = rectToPoints b.length b.pos
+    in List.any (flip isInside (fromVectors ppoints)) bpoints
+        || List.any (flip isInside (fromVectors bpoints)) ppoints
+
+flipVel : (Float, Float) -> (Float, Float)
+flipVel (x,y) = (negate x, negate y)
+
+-- collideBlock : Float -> Float -> (Float,Float) -> Block -> Block
+-- collideBlock length angle (x,y) b =
+    -- let tripoints = triPoints length angle (x,y)
+        -- rectpoints = rectPoints b.length b.pos
+    -- in if List.any (flip isInside (fromVectors tripoints)) rectpoints 
+       -- || List.any (flip isInside (fromVectors rectpoints)) tripoints
+           -- then {b | color <- red}
+           -- else {b | color <- green}
 
 addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
 addVelocity (mx, my) (x, y) =
@@ -123,7 +118,7 @@ type alias Model =
     , vel : (Float, Float)
     , angle : Float
     , viewport : (Int, Int)
-    , length : Float
+    , playerSize : Float
     , blocks : List Block
     }
 
@@ -133,8 +128,8 @@ init =
     , vel = (0,0)
     , angle = 0
     , viewport = (windowW, windowH)
-    , length = playerSize
-    , blocks = [ Block 20 (50,50) purple
+    , playerSize = playerSize
+    , blocks = [ Block 30 (50,50) purple
                ]
     }
 
@@ -172,7 +167,7 @@ render model =
 
 drawBlock : Block -> Form
 drawBlock b = rect b.length b.length
-                |> filled purple
+                |> filled b.color
                 |> move b.pos
                 
 relativeAngle : (Int,Int) -> Float
@@ -188,42 +183,3 @@ relativeAngle motion =
         (-1,1)  -> pi * 0.75
         otherwise -> 0
 
--- COLLISION CALCULATIONS
--- collision library represents shapes as lists of vertices
--- so we need to be able to convert our Forms to that.
-
--- for a circle of given radius, find point along the circle
--- at a given angle
-rotatedPoint : Float -> (Float,Float) -> Float -> Vec2
-rotatedPoint radius (x,y) angle =
-    let newx = (+) x <| cos angle * radius
-        newy = (+) y <| sin angle * radius
-    in vec2 newx newy
-
--- TRIANGLE FUNCTIONS
--- get radius of triangle
-triRadius : Float -> Float
-triRadius length = flip (/) 2 <| sqrt ((length ^ 2) + ((length/2) ^ 2))
-
--- list constituent vertices of rectangle
--- given a triangle's side length and location
--- give back a list of locations of its points
-triPoints : Float -> Float -> (Float, Float) -> List Vec2
-triPoints length angle (x,y) =
-    let radius = triRadius length
-    in List.map (rotatedPoint radius (x,y)) 
-        [angle, angle + (pi * 2/3), angle + (pi * 4/3)] 
-
--- RECT FUNCTIONS
--- get radius of rectangle
-rectRadius : Float -> Float
-rectRadius length = 
-    let half = length / 2
-    in sqrt <| 2 * (half^2)
-
--- list constituent vertices of rectangle
-rectPoints : Float -> (Float,Float) -> List Vec2
-rectPoints length (x,y) =
-    let radius = rectRadius length
-    in List.map (rotatedPoint radius (x,y))
-        [0, pi/2, pi, -pi/2]

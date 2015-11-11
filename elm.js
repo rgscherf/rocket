@@ -3445,10 +3445,10 @@ Elm.Main.make = function (_elm) {
                                 A2($Basics.min,calcy,maxvel))};
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 101 and 106");
+                 "between lines 110 and 115");
               }();}
          _U.badCase($moduleName,
-         "between lines 101 and 106");
+         "between lines 110 and 115");
       }();
    });
    var oneCollide = F2(function (ppoints,
@@ -3457,7 +3457,7 @@ Elm.Main.make = function (_elm) {
          var bpoints = A2($RocketGeometry.rectToPoints,
          b.length,
          b.pos);
-         return A2($List.any,
+         var didCollide = A2($List.any,
          A2($Basics.flip,
          $Collision2D.isInside,
          $Collision2D.fromVectors(ppoints)),
@@ -3466,18 +3466,54 @@ Elm.Main.make = function (_elm) {
          $Collision2D.isInside,
          $Collision2D.fromVectors(bpoints)),
          ppoints);
+         return A2($Debug.watch,
+         "didcollide",
+         didCollide);
       }();
    });
    var decideVel = F3(function (model,
    vel,
-   block) {
-      return _U.cmp($Basics.fst(model.pos),
-      block.length / 2 + $Basics.fst(block.pos)) < 0 || _U.cmp($Basics.fst(model.pos),
-      block.length / 2 - $Basics.fst(block.pos)) > 0 ? {ctor: "_Tuple2"
-                                                       ,_0: $Basics.fst(vel)
-                                                       ,_1: $Basics.negate($Basics.snd(vel))} : {ctor: "_Tuple2"
-                                                                                                ,_0: $Basics.negate($Basics.fst(vel))
-                                                                                                ,_1: $Basics.snd(vel)};
+   b) {
+      return function () {
+         var lpos = {ctor: "_Tuple2"
+                    ,_0: b.length / 2 - $Basics.fst(b.pos)
+                    ,_1: $Basics.snd(b.pos)};
+         var ldist = A2($RocketGeometry.dist,
+         model.pos,
+         lpos);
+         var rpos = {ctor: "_Tuple2"
+                    ,_0: b.length / 2 + $Basics.fst(b.pos)
+                    ,_1: $Basics.snd(b.pos)};
+         var rdist = A2($RocketGeometry.dist,
+         model.pos,
+         rpos);
+         var dpos = {ctor: "_Tuple2"
+                    ,_0: $Basics.fst(b.pos)
+                    ,_1: b.length / 2 - $Basics.snd(b.pos)};
+         var ddist = A2($RocketGeometry.dist,
+         model.pos,
+         dpos);
+         var upos = {ctor: "_Tuple2"
+                    ,_0: $Basics.fst(b.pos)
+                    ,_1: b.length / 2 + $Basics.snd(b.pos)};
+         var udist = A2($RocketGeometry.dist,
+         model.pos,
+         upos);
+         var allmin = A3($List.foldl,
+         $Basics.min,
+         9999,
+         _L.fromArray([udist
+                      ,ddist
+                      ,rdist
+                      ,ldist]));
+         return _U.eq(allmin,
+         udist) || _U.eq(allmin,
+         ddist) ? {ctor: "_Tuple2"
+                  ,_0: $Basics.fst(vel)
+                  ,_1: $Basics.negate($Basics.snd(vel))} : {ctor: "_Tuple2"
+                                                           ,_0: $Basics.negate($Basics.fst(vel))
+                                                           ,_1: $Basics.snd(vel)};
+      }();
    });
    var checkCollision = F3(function (model,
    blocks,
@@ -9159,6 +9195,28 @@ Elm.RocketGeometry.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
+   var dist = F2(function (_v0,
+   _v1) {
+      return function () {
+         switch (_v1.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v0.ctor)
+                 {case "_Tuple2":
+                    return function () {
+                         var hs = Math.pow(_v0._1 - _v1._1,
+                         2);
+                         var ws = Math.pow(_v0._0 - _v1._0,
+                         2);
+                         return $Basics.sqrt(ws + hs);
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 47 and 49");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 47 and 49");
+      }();
+   });
    var rectRadius = function (length) {
       return function () {
          var half = length / 2;
@@ -9170,19 +9228,19 @@ Elm.RocketGeometry.make = function (_elm) {
       return length / $Basics.sqrt(3);
    };
    var rotatedPoint = F3(function (radius,
-   _v0,
+   _v8,
    angle) {
       return function () {
-         switch (_v0.ctor)
+         switch (_v8.ctor)
          {case "_Tuple2":
             return function () {
                  var newy = F2(function (x,
                  y) {
                     return x + y;
-                 })(_v0._1)($Basics.sin(angle) * radius);
+                 })(_v8._1)($Basics.sin(angle) * radius);
                  var newx = F2(function (x,y) {
                     return x + y;
-                 })(_v0._0)($Basics.cos(angle) * radius);
+                 })(_v8._0)($Basics.cos(angle) * radius);
                  return A2($Math$Vector2.vec2,
                  newx,
                  newy);
@@ -9193,9 +9251,9 @@ Elm.RocketGeometry.make = function (_elm) {
    });
    var triToPoints = F3(function (length,
    angle,
-   _v4) {
+   _v12) {
       return function () {
-         switch (_v4.ctor)
+         switch (_v12.ctor)
          {case "_Tuple2":
             return function () {
                  var radius = triRadius(length);
@@ -9203,8 +9261,8 @@ Elm.RocketGeometry.make = function (_elm) {
                  A2(rotatedPoint,
                  radius,
                  {ctor: "_Tuple2"
-                 ,_0: _v4._0
-                 ,_1: _v4._1}),
+                 ,_0: _v12._0
+                 ,_1: _v12._1}),
                  _L.fromArray([angle
                               ,angle + $Basics.pi * 2 / 3
                               ,angle + $Basics.pi * 4 / 3]));
@@ -9214,9 +9272,9 @@ Elm.RocketGeometry.make = function (_elm) {
       }();
    });
    var rectToPoints = F2(function (length,
-   _v8) {
+   _v16) {
       return function () {
-         switch (_v8.ctor)
+         switch (_v16.ctor)
          {case "_Tuple2":
             return function () {
                  var radius = rectRadius(length);
@@ -9224,8 +9282,8 @@ Elm.RocketGeometry.make = function (_elm) {
                  A2(rotatedPoint,
                  radius,
                  {ctor: "_Tuple2"
-                 ,_0: _v8._0
-                 ,_1: _v8._1}),
+                 ,_0: _v16._0
+                 ,_1: _v16._1}),
                  _L.fromArray([0
                               ,$Basics.pi / 2
                               ,$Basics.pi
@@ -9240,7 +9298,8 @@ Elm.RocketGeometry.make = function (_elm) {
                                 ,triRadius: triRadius
                                 ,triToPoints: triToPoints
                                 ,rectRadius: rectRadius
-                                ,rectToPoints: rectToPoints};
+                                ,rectToPoints: rectToPoints
+                                ,dist: dist};
    return _elm.RocketGeometry.values;
 };
 Elm.Set = Elm.Set || {};

@@ -41,3 +41,9 @@ rectToPoints length (x,y) =
     let radius = rectRadius length
     in List.map (rotatedPoint radius (x,y))
         [0, pi/2, pi, -pi/2]
+
+dist : (Float, Float) -> (Float, Float) -> Float
+dist (xa, ya) (xb, yb) =
+    let ws = (xa - xb) ^ 2
+        hs = (ya - yb) ^ 2
+    in sqrt (ws + hs) 

@@ -84,17 +84,26 @@ checkCollision model blocks vel =
             else checkCollision model bs vel 
 
 decideVel : Model -> (Float,Float) -> Block -> (Float,Float)
-decideVel model vel block =
-   if (fst model.pos) < ((block.length / 2) + fst block.pos ) 
-    || (fst model.pos) > ((block.length / 2) - fst block.pos )
-    then (fst vel, negate <| snd vel)
-    else (negate <| fst vel, snd vel)
+decideVel model vel b =
+    let upos = (fst b.pos, (b.length/2) + snd b.pos)
+        dpos = (fst b.pos, (b.length/2) - snd b.pos)
+        rpos = ((b.length/2) + fst b.pos, snd b.pos)
+        lpos = ((b.length/2) - fst b.pos, snd b.pos)
+        udist = dist model.pos upos
+        ddist = dist model.pos dpos
+        rdist = dist model.pos rpos
+        ldist = dist model.pos lpos
+        allmin = List.foldl min 9999 [udist, ddist, rdist, ldist]
+    in if allmin == udist || allmin == ddist
+        then (fst vel, negate <| snd vel)
+        else (negate <| fst vel, snd vel)
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide ppoints b =
     let bpoints = rectToPoints b.length b.pos
-    in List.any (flip isInside (fromVectors ppoints)) bpoints
-        || List.any (flip isInside (fromVectors bpoints)) ppoints
+        didCollide = List.any (flip isInside (fromVectors ppoints)) bpoints
+                  || List.any (flip isInside (fromVectors bpoints)) ppoints
+    in (watch "didcollide") didCollide
 
 addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
 addVelocity (mx, my) (x, y) =

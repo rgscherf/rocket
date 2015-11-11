@@ -215,10 +215,10 @@ Elm.Main.make = function (_elm) {
                                 A2($Basics.min,calcy,maxvel))};
                       }();}
                  _U.badCase($moduleName,
-                 "between lines 101 and 106");
+                 "between lines 110 and 115");
               }();}
          _U.badCase($moduleName,
-         "between lines 101 and 106");
+         "between lines 110 and 115");
       }();
    });
    var oneCollide = F2(function (ppoints,
@@ -227,7 +227,7 @@ Elm.Main.make = function (_elm) {
          var bpoints = A2($RocketGeometry.rectToPoints,
          b.length,
          b.pos);
-         return A2($List.any,
+         var didCollide = A2($List.any,
          A2($Basics.flip,
          $Collision2D.isInside,
          $Collision2D.fromVectors(ppoints)),
@@ -236,18 +236,54 @@ Elm.Main.make = function (_elm) {
          $Collision2D.isInside,
          $Collision2D.fromVectors(bpoints)),
          ppoints);
+         return A2($Debug.watch,
+         "didcollide",
+         didCollide);
       }();
    });
    var decideVel = F3(function (model,
    vel,
-   block) {
-      return _U.cmp($Basics.fst(model.pos),
-      block.length / 2 + $Basics.fst(block.pos)) < 0 || _U.cmp($Basics.fst(model.pos),
-      block.length / 2 - $Basics.fst(block.pos)) > 0 ? {ctor: "_Tuple2"
-                                                       ,_0: $Basics.fst(vel)
-                                                       ,_1: $Basics.negate($Basics.snd(vel))} : {ctor: "_Tuple2"
-                                                                                                ,_0: $Basics.negate($Basics.fst(vel))
-                                                                                                ,_1: $Basics.snd(vel)};
+   b) {
+      return function () {
+         var lpos = {ctor: "_Tuple2"
+                    ,_0: b.length / 2 - $Basics.fst(b.pos)
+                    ,_1: $Basics.snd(b.pos)};
+         var ldist = A2($RocketGeometry.dist,
+         model.pos,
+         lpos);
+         var rpos = {ctor: "_Tuple2"
+                    ,_0: b.length / 2 + $Basics.fst(b.pos)
+                    ,_1: $Basics.snd(b.pos)};
+         var rdist = A2($RocketGeometry.dist,
+         model.pos,
+         rpos);
+         var dpos = {ctor: "_Tuple2"
+                    ,_0: $Basics.fst(b.pos)
+                    ,_1: b.length / 2 - $Basics.snd(b.pos)};
+         var ddist = A2($RocketGeometry.dist,
+         model.pos,
+         dpos);
+         var upos = {ctor: "_Tuple2"
+                    ,_0: $Basics.fst(b.pos)
+                    ,_1: b.length / 2 + $Basics.snd(b.pos)};
+         var udist = A2($RocketGeometry.dist,
+         model.pos,
+         upos);
+         var allmin = A3($List.foldl,
+         $Basics.min,
+         9999,
+         _L.fromArray([udist
+                      ,ddist
+                      ,rdist
+                      ,ldist]));
+         return _U.eq(allmin,
+         udist) || _U.eq(allmin,
+         ddist) ? {ctor: "_Tuple2"
+                  ,_0: $Basics.fst(vel)
+                  ,_1: $Basics.negate($Basics.snd(vel))} : {ctor: "_Tuple2"
+                                                           ,_0: $Basics.negate($Basics.fst(vel))
+                                                           ,_1: $Basics.snd(vel)};
+      }();
    });
    var checkCollision = F3(function (model,
    blocks,

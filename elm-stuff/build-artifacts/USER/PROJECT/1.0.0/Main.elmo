@@ -10,103 +10,364 @@ Elm.Main.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Main",
    $Basics = Elm.Basics.make(_elm),
+   $Collision2D = Elm.Collision2D.make(_elm),
    $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Html = Elm.Html.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
+   $Math$Vector2 = Elm.Math.Vector2.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var findAngle = F2(function (o,
-   a) {
-      return A2($Basics.atan2,o,a);
-   });
-   var makeLine = function (p) {
-      return A2($Graphics$Collage.traced,
-      $Graphics$Collage.dashed($Color.lightGrey),
-      p);
-   };
-   var view = function (_v0) {
+   $RocketConstants = Elm.RocketConstants.make(_elm),
+   $RocketGeometry = Elm.RocketGeometry.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var relativeAngle = function (motion) {
       return function () {
-         switch (_v0.ctor)
+         switch (motion.ctor)
          {case "_Tuple2":
-            return function () {
-                 var collagey = 500;
-                 var halfy = collagey / 2.0;
-                 var collagex = 500;
-                 var halfx = collagex / 2.0;
-                 var relativey = halfy - $Basics.toFloat(_v0._1);
-                 var relativex = $Basics.toFloat(_v0._0) - halfx;
-                 return A2($Html.div,
-                 _L.fromArray([]),
-                 _L.fromArray([$Html.fromElement(A3($Graphics$Collage.collage,
-                              collagex,
-                              collagey,
-                              _L.fromArray([$Graphics$Collage.filled($Color.grey)(A2($Graphics$Collage.rect,
-                                           collagex,
-                                           collagey))
-                                           ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2"
-                                           ,_0: 0 - halfx
-                                           ,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: halfx
-                                           ,_1: 0}))
-                                           ,$Graphics$Collage.traced($Graphics$Collage.defaultLine)(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2"
-                                           ,_0: 0
-                                           ,_1: 0 - halfy},
-                                           {ctor: "_Tuple2"
-                                           ,_0: 0
-                                           ,_1: halfy}))
-                                           ,$Graphics$Collage.move({ctor: "_Tuple2"
-                                                                   ,_0: relativex
-                                                                   ,_1: relativey})($Graphics$Collage.filled($Color.orange)(A2($Graphics$Collage.ngon,
-                                           6,
-                                           5)))
-                                           ,makeLine(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2",_0: 0,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: 0}))
-                                           ,makeLine(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2",_0: 0,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: relativey}))
-                                           ,makeLine(A2($Graphics$Collage.segment,
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: 0},
-                                           {ctor: "_Tuple2"
-                                           ,_0: relativex
-                                           ,_1: relativey}))
-                                           ,$Graphics$Collage.move({ctor: "_Tuple2"
-                                                                   ,_0: 0
-                                                                   ,_1: 0})($Graphics$Collage.outlined($Graphics$Collage.dashed($Color.lightGrey))($Graphics$Collage.circle($Basics.sqrt(Math.pow(relativex,
-                                           2) + Math.pow(relativey,
-                                           2)))))])))
-                              ,$Html.fromElement($Graphics$Element.show(A2($Basics.atan2,
-                              relativey,
-                              relativex)))]));
-              }();}
-         _U.badCase($moduleName,
-         "between lines 13 and 42");
+            switch (motion._0)
+              {case -1: switch (motion._1)
+                   {case -1:
+                      return $Basics.negate($Basics.pi * 0.75);
+                      case 0: return $Basics.pi;
+                      case 1:
+                      return $Basics.pi * 0.75;}
+                   break;
+                 case 0: switch (motion._1)
+                   {case -1:
+                      return $Basics.negate($Basics.pi / 2);
+                      case 1: return $Basics.pi / 2;}
+                   break;
+                 case 1: switch (motion._1)
+                   {case -1:
+                      return $Basics.negate($Basics.pi * 0.25);
+                      case 0: return 0;
+                      case 1:
+                      return $Basics.pi * 0.25;}
+                   break;}
+              break;}
+         return 0;
       }();
    };
-   var clickPos = A2($Signal.sampleOn,
-   $Mouse.clicks,
-   $Mouse.position);
+   var drawBlock = function (b) {
+      return $Graphics$Collage.move(b.pos)($Graphics$Collage.filled(b.color)(A2($Graphics$Collage.rect,
+      b.length,
+      b.length)));
+   };
+   var render = function (model) {
+      return A3($Graphics$Collage.collage,
+      $RocketConstants.windowW,
+      $RocketConstants.windowH,
+      A2($Basics._op["++"],
+      _L.fromArray([$Graphics$Collage.filled($Color.lightGrey)(A2($Graphics$Collage.rect,
+                   $Basics.toFloat($RocketConstants.windowW),
+                   $Basics.toFloat($RocketConstants.windowH)))
+                   ,$Graphics$Collage.move({ctor: "_Tuple2"
+                                           ,_0: $Basics.fst(model.pos)
+                                           ,_1: $Basics.snd(model.pos)})($Graphics$Collage.rotate(model.angle)($Graphics$Collage.filled($Color.green)(A2($Graphics$Collage.ngon,
+                   3,
+                   model.playerSize))))]),
+      A2($List.map,
+      drawBlock,
+      model.blocks)));
+   };
+   var Block = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,color: c
+             ,length: a
+             ,pos: b};
+   });
+   var init = {_: {}
+              ,angle: 0
+              ,blocks: _L.fromArray([A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2",_0: 60,_1: 60},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2",_0: 90,_1: 60},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: 120
+                                    ,_1: 60},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -60
+                                    ,_1: -30},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -60
+                                    ,_1: -60},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -60
+                                    ,_1: -90},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -400
+                                    ,_1: -100},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -400
+                                    ,_1: -80},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -400
+                                    ,_1: -50},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -370
+                                    ,_1: -50},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -340
+                                    ,_1: -50},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -340
+                                    ,_1: -80},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -340
+                                    ,_1: -100},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -370
+                                    ,_1: -100},
+                                    $Color.purple)
+                                    ,A3(Block,
+                                    30,
+                                    {ctor: "_Tuple2"
+                                    ,_0: -400
+                                    ,_1: 200},
+                                    $Color.purple)])
+              ,playerSize: $RocketConstants.playerSize
+              ,pos: {ctor: "_Tuple2"
+                    ,_0: 0
+                    ,_1: 0}
+              ,vel: {ctor: "_Tuple2"
+                    ,_0: 0
+                    ,_1: 0}
+              ,viewport: {ctor: "_Tuple2"
+                         ,_0: $RocketConstants.windowW
+                         ,_1: $RocketConstants.windowH}};
+   var Model = F6(function (a,
+   b,
+   c,
+   d,
+   e,
+   f) {
+      return {_: {}
+             ,angle: c
+             ,blocks: f
+             ,playerSize: e
+             ,pos: a
+             ,vel: b
+             ,viewport: d};
+   });
+   var addVelocity = F2(function (_v3,
+   _v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v3.ctor)
+                 {case "_Tuple2":
+                    return function () {
+                         var maxvel = 5;
+                         var calcy = _v3._1 + $Basics.toFloat(_v4._1);
+                         var calcx = _v3._0 + $Basics.toFloat(_v4._0);
+                         return {ctor: "_Tuple2"
+                                ,_0: A2($Basics.max,
+                                $Basics.negate(maxvel),
+                                A2($Basics.min,calcx,maxvel))
+                                ,_1: A2($Basics.max,
+                                $Basics.negate(maxvel),
+                                A2($Basics.min,calcy,maxvel))};
+                      }();}
+                 _U.badCase($moduleName,
+                 "between lines 101 and 106");
+              }();}
+         _U.badCase($moduleName,
+         "between lines 101 and 106");
+      }();
+   });
+   var oneCollide = F2(function (ppoints,
+   b) {
+      return function () {
+         var bpoints = A2($RocketGeometry.rectToPoints,
+         b.length,
+         b.pos);
+         return A2($List.any,
+         A2($Basics.flip,
+         $Collision2D.isInside,
+         $Collision2D.fromVectors(ppoints)),
+         bpoints) || A2($List.any,
+         A2($Basics.flip,
+         $Collision2D.isInside,
+         $Collision2D.fromVectors(bpoints)),
+         ppoints);
+      }();
+   });
+   var decideVel = F3(function (model,
+   vel,
+   block) {
+      return _U.cmp($Basics.fst(model.pos),
+      block.length / 2 + $Basics.fst(block.pos)) < 0 || _U.cmp($Basics.fst(model.pos),
+      block.length / 2 - $Basics.fst(block.pos)) > 0 ? {ctor: "_Tuple2"
+                                                       ,_0: $Basics.fst(vel)
+                                                       ,_1: $Basics.negate($Basics.snd(vel))} : {ctor: "_Tuple2"
+                                                                                                ,_0: $Basics.negate($Basics.fst(vel))
+                                                                                                ,_1: $Basics.snd(vel)};
+   });
+   var checkCollision = F3(function (model,
+   blocks,
+   vel) {
+      return function () {
+         switch (blocks.ctor)
+         {case "::":
+            return A2(oneCollide,
+              A3($RocketGeometry.triToPoints,
+              model.playerSize,
+              model.angle,
+              model.pos),
+              blocks._0) ? A3(decideVel,
+              model,
+              vel,
+              blocks._0) : A3(checkCollision,
+              model,
+              blocks._1,
+              vel);
+            case "[]": return vel;}
+         _U.badCase($moduleName,
+         "between lines 79 and 84");
+      }();
+   });
+   var changePos = function (model) {
+      return function () {
+         var newPos = {ctor: "_Tuple2"
+                      ,_0: $Basics.fst(model.pos) + $Basics.fst(model.vel)
+                      ,_1: $Basics.snd(model.pos) + $Basics.snd(model.vel)};
+         return _U.replace([["pos"
+                            ,A2($Debug.watch,
+                            "newPos",
+                            newPos)]],
+         model);
+      }();
+   };
+   var update = F2(function (action,
+   model) {
+      return function () {
+         switch (action.ctor)
+         {case "Thrust":
+            return function () {
+                 var newAngle = !_U.eq(action._0,
+                 {ctor: "_Tuple2"
+                 ,_0: 0
+                 ,_1: 0}) ? relativeAngle(action._0) : model.angle;
+                 return changePos(_U.replace([["vel"
+                                              ,A2(checkCollision,
+                                              model,
+                                              model.blocks)(A2(addVelocity,
+                                              model.vel,
+                                              action._0))]
+                                             ,["angle",newAngle]],
+                 model));
+              }();
+            case "Tick":
+            return function () {
+                 var yframeDecay = _U.cmp($Basics.snd(model.vel),
+                 0) > 0 ? $RocketConstants.decay * -1 : $RocketConstants.decay;
+                 var xframeDecay = _U.cmp($Basics.fst(model.vel),
+                 0) > 0 ? $RocketConstants.decay * -1 : $RocketConstants.decay;
+                 var newVel = {ctor: "_Tuple2"
+                              ,_0: $Basics.fst(model.vel) + xframeDecay
+                              ,_1: $Basics.snd(model.vel) + yframeDecay};
+                 return changePos(_U.replace([["vel"
+                                              ,A3(checkCollision,
+                                              model,
+                                              model.blocks,
+                                              newVel)]],
+                 model));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 42 and 62");
+      }();
+   });
+   var Tick = function (a) {
+      return {ctor: "Tick",_0: a};
+   };
+   var Thrust = function (a) {
+      return {ctor: "Thrust"
+             ,_0: a};
+   };
+   var signals = $Signal.mergeMany(_L.fromArray([A2($Signal.map,
+                                                function (_v17) {
+                                                   return function () {
+                                                      return Thrust({ctor: "_Tuple2"
+                                                                    ,_0: _v17.x
+                                                                    ,_1: _v17.y});
+                                                   }();
+                                                },
+                                                A2($Signal.sampleOn,
+                                                $Time.fps(15),
+                                                $Keyboard.wasd))
+                                                ,A2($Signal.map,
+                                                Tick,
+                                                $Time.fps(60))]));
+   var model = A3($Signal.foldp,
+   update,
+   init,
+   signals);
    var main = A2($Signal.map,
-   view,
-   clickPos);
+   render,
+   model);
    _elm.Main.values = {_op: _op
-                      ,clickPos: clickPos
-                      ,view: view
-                      ,makeLine: makeLine
-                      ,findAngle: findAngle
-                      ,main: main};
+                      ,signals: signals
+                      ,Thrust: Thrust
+                      ,Tick: Tick
+                      ,main: main
+                      ,update: update
+                      ,changePos: changePos
+                      ,checkCollision: checkCollision
+                      ,decideVel: decideVel
+                      ,oneCollide: oneCollide
+                      ,addVelocity: addVelocity
+                      ,Model: Model
+                      ,init: init
+                      ,model: model
+                      ,Block: Block
+                      ,render: render
+                      ,drawBlock: drawBlock
+                      ,relativeAngle: relativeAngle};
    return _elm.Main.values;
 };

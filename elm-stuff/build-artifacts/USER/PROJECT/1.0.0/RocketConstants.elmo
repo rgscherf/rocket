@@ -1,0 +1,29 @@
+Elm.RocketConstants = Elm.RocketConstants || {};
+Elm.RocketConstants.make = function (_elm) {
+   "use strict";
+   _elm.RocketConstants = _elm.RocketConstants || {};
+   if (_elm.RocketConstants.values)
+   return _elm.RocketConstants.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "RocketConstants",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var playerSize = 20;
+   var decay = 2.0e-2;
+   var accel = 1.5;
+   var windowH = 600;
+   var windowW = 1200;
+   _elm.RocketConstants.values = {_op: _op
+                                 ,windowW: windowW
+                                 ,windowH: windowH
+                                 ,accel: accel
+                                 ,decay: decay
+                                 ,playerSize: playerSize};
+   return _elm.RocketConstants.values;
+};

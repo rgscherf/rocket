@@ -1,0 +1,114 @@
+Elm.Collision2D = Elm.Collision2D || {};
+Elm.Collision2D.make = function (_elm) {
+   "use strict";
+   _elm.Collision2D = _elm.Collision2D || {};
+   if (_elm.Collision2D.values)
+   return _elm.Collision2D.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Collision2D",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Math$Vector2 = Elm.Math.Vector2.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var Side = F2(function (a,b) {
+      return {_: {}
+             ,keyPoint: a
+             ,normal: b};
+   });
+   var Bounded = function (a) {
+      return {ctor: "Bounded"
+             ,_0: a};
+   };
+   var isInside = F2(function (point,
+   _v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "Bounded":
+            return function () {
+                 var isBehind = function (side) {
+                    return _U.cmp(A2($Math$Vector2.dot,
+                    side.normal,
+                    A2($Math$Vector2.sub,
+                    point,
+                    side.keyPoint)),
+                    1.0e-6) < 0;
+                 };
+                 return $Basics.not($List.isEmpty(_v0._0)) && A2($List.all,
+                 isBehind,
+                 _v0._0);
+              }();}
+         _U.badCase($moduleName,
+         "between lines 76 and 80");
+      }();
+   });
+   var isOutside = F2(function (point,
+   boundary) {
+      return $Basics.not(A2(isInside,
+      point,
+      boundary));
+   });
+   var fromSegments = function (segments) {
+      return function () {
+         var isDefined = function (vec) {
+            return $Basics.not($Basics.isNaN($Math$Vector2.getX(vec)) || $Basics.isNaN($Math$Vector2.getY(vec)));
+         };
+         var toNormal = F2(function (a,
+         b) {
+            return function () {
+               var $ = $Math$Vector2.toTuple(A2($Math$Vector2.direction,
+               a,
+               b)),
+               x = $._0,
+               y = $._1;
+               return $Math$Vector2.fromTuple({ctor: "_Tuple2"
+                                              ,_0: 0 - y
+                                              ,_1: x});
+            }();
+         });
+         var toSide = function (_v3) {
+            return function () {
+               switch (_v3.ctor)
+               {case "_Tuple2": return {_: {}
+                                       ,keyPoint: _v3._0
+                                       ,normal: A2(toNormal,
+                                       _v3._0,
+                                       _v3._1)};}
+               _U.badCase($moduleName,
+               "between lines 43 and 45");
+            }();
+         };
+         return Bounded($List.filter(function ($) {
+            return isDefined(function (_) {
+               return _.normal;
+            }($));
+         })(A2($List.map,
+         toSide,
+         segments)));
+      }();
+   };
+   var fromVectors = function (vertexes) {
+      return function () {
+         var segments = A2($List.map2,
+         F2(function (v0,v1) {
+            return {ctor: "_Tuple2"
+                   ,_0: v0
+                   ,_1: v1};
+         }),
+         vertexes)(A2($Basics._op["++"],
+         A2($List.drop,1,vertexes),
+         A2($List.take,1,vertexes)));
+         return _U.cmp($List.length(vertexes),
+         3) > -1 ? fromSegments(segments) : Bounded(_L.fromArray([]));
+      }();
+   };
+   _elm.Collision2D.values = {_op: _op
+                             ,isOutside: isOutside
+                             ,isInside: isInside
+                             ,fromVectors: fromVectors};
+   return _elm.Collision2D.values;
+};

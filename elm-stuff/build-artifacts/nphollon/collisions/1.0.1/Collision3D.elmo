@@ -1,0 +1,96 @@
+Elm.Collision3D = Elm.Collision3D || {};
+Elm.Collision3D.make = function (_elm) {
+   "use strict";
+   _elm.Collision3D = _elm.Collision3D || {};
+   if (_elm.Collision3D.values)
+   return _elm.Collision3D.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Collision3D",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Math$Vector3 = Elm.Math.Vector3.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var Face = F2(function (a,b) {
+      return {_: {}
+             ,keyPoint: a
+             ,normal: b};
+   });
+   var Bounded = function (a) {
+      return {ctor: "Bounded"
+             ,_0: a};
+   };
+   var isInside = F2(function (point,
+   _v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "Bounded":
+            return function () {
+                 var isBehind = function (face) {
+                    return _U.cmp(A2($Math$Vector3.dot,
+                    face.normal,
+                    A2($Math$Vector3.sub,
+                    point,
+                    face.keyPoint)),
+                    1.0e-6) < 0;
+                 };
+                 return $Basics.not($List.isEmpty(_v0._0)) && A2($List.all,
+                 isBehind,
+                 _v0._0);
+              }();}
+         _U.badCase($moduleName,
+         "between lines 68 and 72");
+      }();
+   });
+   var isOutside = F2(function (point,
+   boundary) {
+      return $Basics.not(A2(isInside,
+      point,
+      boundary));
+   });
+   var fromTriangles = function (triangles) {
+      return function () {
+         var isDefined = function (vec) {
+            return $List.all(function ($) {
+               return $Basics.not($Basics.isNaN($));
+            })($List.map(function (f) {
+               return f(vec);
+            })(_L.fromArray([$Math$Vector3.getX
+                            ,$Math$Vector3.getY
+                            ,$Math$Vector3.getZ])));
+         };
+         var toFace = function (_v3) {
+            return function () {
+               switch (_v3.ctor)
+               {case "_Tuple3": return {_: {}
+                                       ,keyPoint: _v3._0
+                                       ,normal: $Math$Vector3.normalize(A2($Math$Vector3.cross,
+                                       A2($Math$Vector3.sub,
+                                       _v3._1,
+                                       _v3._0),
+                                       A2($Math$Vector3.sub,
+                                       _v3._2,
+                                       _v3._0)))};}
+               _U.badCase($moduleName,
+               "between lines 32 and 35");
+            }();
+         };
+         return Bounded($List.filter(function ($) {
+            return isDefined(function (_) {
+               return _.normal;
+            }($));
+         })(A2($List.map,
+         toFace,
+         triangles)));
+      }();
+   };
+   _elm.Collision3D.values = {_op: _op
+                             ,isOutside: isOutside
+                             ,isInside: isInside
+                             ,fromTriangles: fromTriangles};
+   return _elm.Collision3D.values;
+};

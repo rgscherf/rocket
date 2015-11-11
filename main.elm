@@ -46,7 +46,7 @@ update action model =
                            else model.angle
             in
             changePos { model 
-                      | vel <- checkCollision model <| addVelocity model.vel delta
+                      | vel <- checkCollision model model.blocks <| addVelocity model.vel delta
                       , angle <- newAngle
                       }
         Tick _ ->
@@ -59,7 +59,7 @@ update action model =
                 newVel = ( (fst model.vel) + xframeDecay
                          , (snd model.vel) + yframeDecay
                          )
-            in changePos { model | vel <- checkCollision model newVel }
+            in changePos { model | vel <- checkCollision model model.blocks newVel }
 
 changePos : Model -> Model
 changePos model =
@@ -68,36 +68,33 @@ changePos model =
                  )
     in
         { model
-        | pos <- newPos
+        | pos <- (watch "newPos") newPos
         -- , blocks <- List.map 
             -- (collideBlock model.playerSize model.angle newPos) 
             -- model.blocks
         }
 
--- every step, check position against internal list of blocks
--- if any collision, reverse velocity
-checkCollision : Model -> (Float, Float) -> (Float,Float)
-checkCollision model vel =
-    let collided = List.any (oneCollide <| triToPoints model.playerSize model.angle model.pos) model.blocks
-    in if collided then flipVel vel else vel
+checkCollision : Model -> List Block -> (Float,Float) -> (Float,Float)
+checkCollision model blocks vel =
+    case blocks of
+        [] ->  vel
+        (b::bs) ->
+            if oneCollide (triToPoints model.playerSize model.angle model.pos) b
+            then decideVel model vel b
+            else checkCollision model bs vel 
+
+decideVel : Model -> (Float,Float) -> Block -> (Float,Float)
+decideVel model vel block =
+   if (fst model.pos) < ((block.length / 2) + fst block.pos ) 
+    || (fst model.pos) > ((block.length / 2) - fst block.pos )
+    then (fst vel, negate <| snd vel)
+    else (negate <| fst vel, snd vel)
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide ppoints b =
     let bpoints = rectToPoints b.length b.pos
     in List.any (flip isInside (fromVectors ppoints)) bpoints
         || List.any (flip isInside (fromVectors bpoints)) ppoints
-
-flipVel : (Float, Float) -> (Float, Float)
-flipVel (x,y) = (negate x, negate y)
-
--- collideBlock : Float -> Float -> (Float,Float) -> Block -> Block
--- collideBlock length angle (x,y) b =
-    -- let tripoints = triPoints length angle (x,y)
-        -- rectpoints = rectPoints b.length b.pos
-    -- in if List.any (flip isInside (fromVectors tripoints)) rectpoints 
-       -- || List.any (flip isInside (fromVectors rectpoints)) tripoints
-           -- then {b | color <- red}
-           -- else {b | color <- green}
 
 addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
 addVelocity (mx, my) (x, y) =
@@ -129,7 +126,21 @@ init =
     , angle = 0
     , viewport = (windowW, windowH)
     , playerSize = playerSize
-    , blocks = [ Block 30 (50,50) purple
+    , blocks = [ Block 30 (60,60) purple
+               , Block 30 (90,60) purple
+               , Block 30 (120,60) purple
+               , Block 30 (-60,-30) purple
+               , Block 30 (-60,-60) purple
+               , Block 30 (-60,-90) purple
+               , Block 30 (-400,-100) purple
+               , Block 30 (-400, -80) purple
+               , Block 30 (-400, -50) purple
+               , Block 30 (-370,-50) purple
+               , Block 30 (-340,-50) purple
+               , Block 30 (-340, -80) purple
+               , Block 30 (-340, -100) purple
+               , Block 30 (-370, -100) purple
+               , Block 30 (-400, 200) purple
                ]
     }
 

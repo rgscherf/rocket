@@ -1,4 +1,4 @@
-module RocketConstants where
+module RktConst where
 
 --------------------
 -- CONSTANTS

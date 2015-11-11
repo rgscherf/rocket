@@ -20,8 +20,8 @@ Elm.Main.make = function (_elm) {
    $Math$Vector2 = Elm.Math.Vector2.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $RocketConstants = Elm.RocketConstants.make(_elm),
-   $RocketGeometry = Elm.RocketGeometry.make(_elm),
+   $RktConst = Elm.RktConst.make(_elm),
+   $RktGeo = Elm.RktGeo.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $Time = Elm.Time.make(_elm);
    var relativeAngle = function (motion) {
@@ -59,12 +59,12 @@ Elm.Main.make = function (_elm) {
    };
    var render = function (model) {
       return A3($Graphics$Collage.collage,
-      $RocketConstants.windowW,
-      $RocketConstants.windowH,
+      $RktConst.windowW,
+      $RktConst.windowH,
       A2($Basics._op["++"],
       _L.fromArray([$Graphics$Collage.filled($Color.lightGrey)(A2($Graphics$Collage.rect,
-                   $Basics.toFloat($RocketConstants.windowW),
-                   $Basics.toFloat($RocketConstants.windowH)))
+                   $Basics.toFloat($RktConst.windowW),
+                   $Basics.toFloat($RktConst.windowH)))
                    ,$Graphics$Collage.move({ctor: "_Tuple2"
                                            ,_0: $Basics.fst(model.pos)
                                            ,_1: $Basics.snd(model.pos)})($Graphics$Collage.rotate(model.angle)($Graphics$Collage.filled($Color.green)(A2($Graphics$Collage.ngon,
@@ -170,7 +170,7 @@ Elm.Main.make = function (_elm) {
                                     ,_0: -400
                                     ,_1: 200},
                                     $Color.purple)])
-              ,playerSize: $RocketConstants.playerSize
+              ,playerSize: $RktConst.playerSize
               ,pos: {ctor: "_Tuple2"
                     ,_0: 0
                     ,_1: 0}
@@ -178,8 +178,8 @@ Elm.Main.make = function (_elm) {
                     ,_0: 0
                     ,_1: 0}
               ,viewport: {ctor: "_Tuple2"
-                         ,_0: $RocketConstants.windowW
-                         ,_1: $RocketConstants.windowH}};
+                         ,_0: $RktConst.windowW
+                         ,_1: $RktConst.windowH}};
    var Model = F6(function (a,
    b,
    c,
@@ -224,7 +224,7 @@ Elm.Main.make = function (_elm) {
    var oneCollide = F2(function (ppoints,
    b) {
       return function () {
-         var bpoints = A2($RocketGeometry.rectToPoints,
+         var bpoints = A2($RktGeo.rectToPoints,
          b.length,
          b.pos);
          var didCollide = A2($List.any,
@@ -248,25 +248,25 @@ Elm.Main.make = function (_elm) {
          var lpos = {ctor: "_Tuple2"
                     ,_0: b.length / 2 - $Basics.fst(b.pos)
                     ,_1: $Basics.snd(b.pos)};
-         var ldist = A2($RocketGeometry.dist,
+         var ldist = A2($RktGeo.dist,
          model.pos,
          lpos);
          var rpos = {ctor: "_Tuple2"
                     ,_0: b.length / 2 + $Basics.fst(b.pos)
                     ,_1: $Basics.snd(b.pos)};
-         var rdist = A2($RocketGeometry.dist,
+         var rdist = A2($RktGeo.dist,
          model.pos,
          rpos);
          var dpos = {ctor: "_Tuple2"
                     ,_0: $Basics.fst(b.pos)
                     ,_1: b.length / 2 - $Basics.snd(b.pos)};
-         var ddist = A2($RocketGeometry.dist,
+         var ddist = A2($RktGeo.dist,
          model.pos,
          dpos);
          var upos = {ctor: "_Tuple2"
                     ,_0: $Basics.fst(b.pos)
                     ,_1: b.length / 2 + $Basics.snd(b.pos)};
-         var udist = A2($RocketGeometry.dist,
+         var udist = A2($RktGeo.dist,
          model.pos,
          upos);
          var allmin = A3($List.foldl,
@@ -292,7 +292,7 @@ Elm.Main.make = function (_elm) {
          switch (blocks.ctor)
          {case "::":
             return A2(oneCollide,
-              A3($RocketGeometry.triToPoints,
+              A3($RktGeo.triToPoints,
               model.playerSize,
               model.angle,
               model.pos),
@@ -342,9 +342,9 @@ Elm.Main.make = function (_elm) {
             case "Tick":
             return function () {
                  var yframeDecay = _U.cmp($Basics.snd(model.vel),
-                 0) > 0 ? $RocketConstants.decay * -1 : $RocketConstants.decay;
+                 0) > 0 ? $RktConst.decay * -1 : $RktConst.decay;
                  var xframeDecay = _U.cmp($Basics.fst(model.vel),
-                 0) > 0 ? $RocketConstants.decay * -1 : $RocketConstants.decay;
+                 0) > 0 ? $RktConst.decay * -1 : $RktConst.decay;
                  var newVel = {ctor: "_Tuple2"
                               ,_0: $Basics.fst(model.vel) + xframeDecay
                               ,_1: $Basics.snd(model.vel) + yframeDecay};

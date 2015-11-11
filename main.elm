@@ -9,8 +9,8 @@ import Math.Vector2 exposing (Vec2)
 import Collision2D exposing (..)
 import Debug exposing (..)
 
-import RocketGeometry exposing (..)
-import RocketConstants exposing (..)
+import RktGeo exposing (..)
+import RktConst exposing (..)
 
 
 

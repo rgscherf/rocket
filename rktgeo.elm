@@ -1,4 +1,4 @@
-module RocketGeometry where
+module RktGeo where
 
 import Math.Vector2 exposing (vec2, Vec2)
 

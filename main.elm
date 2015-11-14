@@ -5,13 +5,13 @@ import Window exposing (..)
 import Mouse
 import Keyboard exposing (..)
 import Time
-import Math.Vector2 exposing (Vec2)
+import Math.Vector2 exposing (..)
 import Collision2D exposing (..)
 import Debug exposing (..)
 
 import RktGeo exposing (..)
 import RktConst exposing (..)
-
+import RktDebug exposing (..)
 
 
 --------------------
@@ -44,37 +44,36 @@ update action model =
             let newAngle = if delta /= (0,0)
                            then relativeAngle delta
                            else model.angle
+                newDelta = vec2 (fst delta |> toFloat)
+                                (snd delta |> toFloat)
+                newVel = add model.vel newDelta
             in
             changePos { model 
-                      | vel <- checkCollision model model.blocks <| addVelocity model.vel delta
-                      , angle <- newAngle
+                          | vel <- checkCollision model model.blocks <| newVel
+                          , angle <- newAngle
                       }
         Tick _ ->
-            let xframeDecay = if fst model.vel > 0
+            let xframeDecay = if getX model.vel > 0
                               then decay * (-1)
                               else decay
-                yframeDecay = if snd model.vel > 0
+                yframeDecay = if getY model.vel > 0
                               then decay * (-1)
                               else decay
-                newVel = ( (fst model.vel) + xframeDecay
-                         , (snd model.vel) + yframeDecay
-                         )
-            in changePos { model | vel <- checkCollision model model.blocks newVel }
+                newVel = vec2 (getX model.vel + xframeDecay) 
+                              (getY model.vel + yframeDecay)
+            in changePos { model 
+                            | vel <- checkCollision model model.blocks newVel
+                         }
 
 changePos : Model -> Model
 changePos model =
-    let newPos = ( fst model.pos + fst model.vel
-                 , snd model.pos + snd model.vel
-                 )
+    let newPos = ( add model.pos model.vel )
     in
         { model
-        | pos <- (watch "newPos") newPos
-        -- , blocks <- List.map 
-            -- (collideBlock model.playerSize model.angle newPos) 
-            -- model.blocks
+            | pos <- (watch "newPos") newPos
         }
 
-checkCollision : Model -> List Block -> (Float,Float) -> (Float,Float)
+checkCollision : Model -> List Block -> Velocity -> Velocity
 checkCollision model blocks vel =
     case blocks of
         [] ->  vel
@@ -83,74 +82,86 @@ checkCollision model blocks vel =
             then decideVel model vel b
             else checkCollision model bs vel 
 
-decideVel : Model -> (Float,Float) -> Block -> (Float,Float)
+decideVel : Model -> Velocity -> Block -> Velocity
 decideVel model vel b =
-    let upos = (fst b.pos, (b.length/2) + snd b.pos)
-        dpos = (fst b.pos, (b.length/2) - snd b.pos)
-        rpos = ((b.length/2) + fst b.pos, snd b.pos)
-        lpos = ((b.length/2) - fst b.pos, snd b.pos)
-        udist = dist model.pos upos
-        ddist = dist model.pos dpos
-        rdist = dist model.pos rpos
-        ldist = dist model.pos lpos
-        allmin = List.foldl min 9999 [udist, ddist, rdist, ldist]
-    in if allmin == udist || allmin == ddist
-        then (fst vel, negate <| snd vel)
-        else (negate <| fst vel, snd vel)
+    let upos = fromTuple (getX b.pos, (b.length/2) + getY b.pos)
+        dpos = fromTuple (getX b.pos, (b.length/2) - getY b.pos)
+        rpos = fromTuple ((b.length/2) + getX b.pos, getY b.pos)
+        lpos = fromTuple ((b.length/2) - getX b.pos, getY b.pos)
+        distances = List.map (distance model.pos) [upos, dpos, rpos, lpos]
+        allmin = List.foldl min 9999 distances
+    in if allmin == (distance model.pos upos) || allmin == (distance model.pos dpos)
+        then fromTuple (getX vel, Basics.negate <| getY vel)
+        else fromTuple (Basics.negate <| getX vel, getY vel)
+
+-- oneCollide : List Vec2 -> Block -> Bool
+-- oneCollide ppoints b =
+    -- let bpoints = rectToPoints b.length b.pos
+        -- didCollide = List.any (flip isInside (fromVectors ppoints)) bpoints
+                  -- || List.any (flip isInside (fromVectors bpoints)) ppoints
+    -- in (watch "didcollide") didCollide
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide ppoints b =
-    let bpoints = rectToPoints b.length b.pos
-        didCollide = List.any (flip isInside (fromVectors ppoints)) bpoints
-                  || List.any (flip isInside (fromVectors bpoints)) ppoints
-    in (watch "didcollide") didCollide
-
-addVelocity : (Float, Float) -> (Int, Int) -> (Float, Float)
-addVelocity (mx, my) (x, y) =
-    let calcx = mx + toFloat x
-        calcy = my + toFloat y
-        maxvel = 5
-    in ( max (negate maxvel) (min calcx maxvel)
-       , max (negate maxvel) (min calcy maxvel)
-       )
-
+    let
+        halflen = b.length / 2
+        btop = getY b.pos + halflen
+        bbot = getY b.pos - halflen
+        bleft = getX b.pos - halflen
+        bright = getX b.pos + halflen
+        isIntersectingX p = getX p <= bright && getX p >= bleft
+        isIntersectingY p = getY p <= btop && getY p >= bbot
+    in 
+        List.any (\p -> isIntersectingX p && isIntersectingY p) ppoints
+        
 
 --------------------
--- MODEL
+-- TYPES & MODEL
 --------------------
+
+type alias Velocity = Vec2
+type alias Position = Vec2
 
 type alias Model =
-    { pos : (Float, Float)
-    , vel : (Float, Float)
+    { pos : Position
+    , vel : Velocity
     , angle : Float
     , viewport : (Int, Int)
     , playerSize : Float
     , blocks : List Block
+    , debug : Bool
     }
+
+type alias Block =
+    { length : Float
+    , pos : Position
+    , color : Color
+    } 
 
 init : Model
 init =
-    { pos = (0,0)
-    , vel = (0,0)
+    { pos = vec2 0 0
+    , vel = vec2 0 0
     , angle = 0
     , viewport = (windowW, windowH)
-    , playerSize = playerSize
-    , blocks = [ Block 30 (60,60) purple
-               , Block 30 (90,60) purple
-               , Block 30 (120,60) purple
-               , Block 30 (-60,-30) purple
-               , Block 30 (-60,-60) purple
-               , Block 30 (-60,-90) purple
-               , Block 30 (-400,-100) purple
-               , Block 30 (-400, -80) purple
-               , Block 30 (-400, -50) purple
-               , Block 30 (-370,-50) purple
-               , Block 30 (-340,-50) purple
-               , Block 30 (-340, -80) purple
-               , Block 30 (-340, -100) purple
-               , Block 30 (-370, -100) purple
-               , Block 30 (-400, 200) purple
+    , playerSize = 30
+    , blocks = [ Block 30 (vec2 60 60) purple
+               , Block 30 (vec2 90 60) purple
+               , Block 30 (vec2 120 60) purple
+               , Block 30 (vec2 -60 -30) purple
+               , Block 30 (vec2 -60 -60) purple
+               , Block 30 (vec2 -60 -90) purple
+               , Block 30 (vec2 -400 -100) purple
+               , Block 30 (vec2 -400 -80) purple
+               , Block 30 (vec2 -400 -50) purple
+               , Block 30 (vec2 -370 -50) purple
+               , Block 30 (vec2 -340 -50) purple
+               , Block 30 (vec2 -340 -80) purple
+               , Block 30 (vec2 -340 -100) purple
+               , Block 30 (vec2 -370 -100) purple
+               , Block 30 (vec2 -400 200) purple
                ]
+    , debug = True
     }
 
 model : Signal Model
@@ -158,48 +169,44 @@ model = Signal.foldp update init signals
 
 
 --------------------
--- OBSTACLES
---------------------
-
-type alias Block =
-    { length : Float
-    , pos : (Float, Float)
-    , color : Color
-    } 
-    
---------------------
 -- VIEW
 --------------------
 
 render : Model -> Element
 render model =
-    collage windowW windowH 
-    (
-        [ rect (toFloat windowW) (toFloat windowH)
-            |> filled lightGrey
-        , ngon 3 model.playerSize
-            |> filled green
-            |> rotate model.angle
-            |> move (fst model.pos, snd model.pos)
-        ]
-        ++ List.map drawBlock model.blocks
-    )
+    let 
+        debugInfo = if model.debug
+                    then drawDebug model
+                    else []
+    in
+        collage windowW windowH 
+        (
+            [ rect (toFloat windowW) (toFloat windowH)
+                |> filled lightGrey
+            , ngon 3 model.playerSize
+                |> filled green
+                |> rotate model.angle
+                |> move (getX model.pos, getY model.pos)
+            ]
+            ++ List.map drawBlock model.blocks
+            ++ debugInfo
+        )
 
 drawBlock : Block -> Form
 drawBlock b = rect b.length b.length
                 |> filled b.color
-                |> move b.pos
+                |> move (toTuple b.pos)
                 
 relativeAngle : (Int,Int) -> Float
 relativeAngle motion =
     case motion of
         (0,1)   -> pi / 2
-        (0,-1)  -> negate <| pi / 2
+        (0,-1)  -> Basics.negate <| pi / 2
         (1,0)   -> 0
         (-1,0)  -> pi
         (1,1)   -> pi * 0.25
-        (-1,-1) -> negate <| pi * 0.75
-        (1,-1)  ->  negate <| pi * 0.25
+        (-1,-1) -> Basics.negate <| pi * 0.75
+        (1,-1)  ->  Basics.negate <| pi * 0.25
         (-1,1)  -> pi * 0.75
         otherwise -> 0
 

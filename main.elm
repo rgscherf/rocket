@@ -1,3 +1,5 @@
+module Main where
+
 import Color exposing (..)
 import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
@@ -12,6 +14,7 @@ import Debug exposing (..)
 import RktGeo exposing (..)
 import RktConst exposing (..)
 import RktDebug exposing (..)
+import RktTypes exposing (..)
 
 
 --------------------
@@ -79,20 +82,22 @@ checkCollision model blocks vel =
         [] ->  vel
         (b::bs) ->
             if oneCollide (triToPoints model.playerSize model.angle model.pos) b
-            then decideVel model vel b
+            then bounceVel model vel b
             else checkCollision model bs vel 
 
-decideVel : Model -> Velocity -> Block -> Velocity
-decideVel model vel b =
+bounceVel : Model -> Velocity -> Block -> Velocity
+bounceVel model vel b =
     let upos = fromTuple (getX b.pos, (b.length/2) + getY b.pos)
         dpos = fromTuple (getX b.pos, (b.length/2) - getY b.pos)
         rpos = fromTuple ((b.length/2) + getX b.pos, getY b.pos)
         lpos = fromTuple ((b.length/2) - getX b.pos, getY b.pos)
         distances = List.map (distance model.pos) [upos, dpos, rpos, lpos]
         allmin = List.foldl min 9999 distances
-    in if allmin == (distance model.pos upos) || allmin == (distance model.pos dpos)
-        then fromTuple (getX vel, Basics.negate <| getY vel)
-        else fromTuple (Basics.negate <| getX vel, getY vel)
+    in if 
+        allmin == (distance model.pos upos) || 
+        allmin == (distance model.pos dpos)
+            then fromTuple (getX vel, Basics.negate <| getY vel)
+            else fromTuple (Basics.negate <| getX vel, getY vel)
 
 -- oneCollide : List Vec2 -> Block -> Bool
 -- oneCollide ppoints b =
@@ -111,32 +116,14 @@ oneCollide ppoints b =
         bright = getX b.pos + halflen
         isIntersectingX p = getX p <= bright && getX p >= bleft
         isIntersectingY p = getY p <= btop && getY p >= bbot
+        isIntersectingAny p = isIntersectingX p && isIntersectingY p
     in 
-        List.any (\p -> isIntersectingX p && isIntersectingY p) ppoints
+        List.any isIntersectingAny ppoints
         
 
 --------------------
--- TYPES & MODEL
+-- MODEL
 --------------------
-
-type alias Velocity = Vec2
-type alias Position = Vec2
-
-type alias Model =
-    { pos : Position
-    , vel : Velocity
-    , angle : Float
-    , viewport : (Int, Int)
-    , playerSize : Float
-    , blocks : List Block
-    , debug : Bool
-    }
-
-type alias Block =
-    { length : Float
-    , pos : Position
-    , color : Color
-    } 
 
 init : Model
 init =

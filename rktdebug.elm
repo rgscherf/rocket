@@ -1,6 +1,11 @@
 module RktDebug where
 
 import Math.Vector2 exposing (..)
+import Graphics.Collage exposing (..)
+import Color exposing (..)
+
+import RktGeo exposing (..)
+import RktTypes exposing (..)
 
 drawDebug : Model -> List Form
 drawDebug model =

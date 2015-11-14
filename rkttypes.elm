@@ -3,22 +3,21 @@ module RktTypes where
 import Math.Vector2 exposing (..)
 import Color exposing (..)
 
-
 type alias Velocity = Vec2
 type alias Position = Vec2
 
 type alias Model =
-    { pos : Position
-    , vel : Velocity
-    , angle : Float
-    , viewport : (Int, Int)
+    { pos        : Position
+    , vel        : Velocity
+    , angle      : Float
+    , viewport   : (Int, Int)
     , playerSize : Float
-    , blocks : List Block
-    , debug : Bool
+    , blocks     : List Block
+    , debug      : Bool
     }
 
 type alias Block =
     { length : Float
-    , pos : Position
-    , color : Color
+    , pos    : Position
+    , color  : Color
     } 

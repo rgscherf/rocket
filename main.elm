@@ -92,7 +92,7 @@ bounceVel model vel b =
         rpos = fromTuple ((b.length/2) + getX b.pos, getY b.pos)
         lpos = fromTuple ((b.length/2) - getX b.pos, getY b.pos)
         distances = List.map (distance model.pos) [upos, dpos, rpos, lpos]
-        allmin = List.foldl min 9999 distances
+        allmin    = List.foldl min 9999 distances
     in if 
         allmin == (distance model.pos upos) || 
         allmin == (distance model.pos dpos)
@@ -110,12 +110,12 @@ oneCollide : List Vec2 -> Block -> Bool
 oneCollide ppoints b =
     let
         halflen = b.length / 2
-        btop = getY b.pos + halflen
-        bbot = getY b.pos - halflen
-        bleft = getX b.pos - halflen
-        bright = getX b.pos + halflen
-        isIntersectingX p = getX p <= bright && getX p >= bleft
-        isIntersectingY p = getY p <= btop && getY p >= bbot
+        btop    = getY b.pos + halflen
+        bbot    = getY b.pos - halflen
+        bleft   = getX b.pos - halflen
+        bright  = getX b.pos + halflen
+        isIntersectingX p   = getX p <= bright && getX p >= bleft
+        isIntersectingY p   = getY p <= btop && getY p >= bbot
         isIntersectingAny p = isIntersectingX p && isIntersectingY p
     in 
         List.any isIntersectingAny ppoints
@@ -127,10 +127,10 @@ oneCollide ppoints b =
 
 init : Model
 init =
-    { pos = vec2 0 0
-    , vel = vec2 0 0
-    , angle = 0
-    , viewport = (windowW, windowH)
+    { pos        = vec2 0 0
+    , vel        = vec2 0 0
+    , angle      = 0
+    , viewport   = (windowW, windowH)
     , playerSize = 30
     , blocks = [ Block 30 (vec2 60 60) purple
                , Block 30 (vec2 90 60) purple
@@ -181,19 +181,19 @@ render model =
 
 drawBlock : Block -> Form
 drawBlock b = rect b.length b.length
-                |> filled b.color
-                |> move (toTuple b.pos)
+               |> filled b.color
+               |> move (toTuple b.pos)
                 
 relativeAngle : (Int,Int) -> Float
 relativeAngle motion =
     case motion of
-        (0,1)   -> pi / 2
-        (0,-1)  -> Basics.negate <| pi / 2
-        (1,0)   -> 0
-        (-1,0)  -> pi
-        (1,1)   -> pi * 0.25
-        (-1,-1) -> Basics.negate <| pi * 0.75
-        (1,-1)  ->  Basics.negate <| pi * 0.25
-        (-1,1)  -> pi * 0.75
+        (0,1)     -> pi / 2
+        (0,-1)    -> Basics.negate <| pi / 2
+        (1,0)     -> 0
+        (-1,0)    -> pi
+        (1,1)     -> pi * 0.25
+        (-1,-1)   -> Basics.negate <| pi * 0.75
+        (1,-1)    -> Basics.negate <| pi * 0.25
+        (-1,1)    -> pi * 0.75
         otherwise -> 0
 

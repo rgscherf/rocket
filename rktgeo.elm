@@ -2,6 +2,8 @@ module RktGeo where
 
 import Math.Vector2 exposing (..)
 
+import RktTypes exposing (..)
+
 -- for a circle of given radius, find point along the circle
 -- at a given angle
 rotatedPoint : Float -> Vec2 -> Float -> Vec2
@@ -30,3 +32,9 @@ rectToPoints length pos =
     let radius = rectRadius length
     in List.map (rotatedPoint radius pos)
         [-pi/4, pi/4, pi * 0.75, -pi * 0.75] 
+
+cirToPoints : Model -> List Vec2
+cirToPoints model =
+    let rads = List.map radians [1..360]
+    in
+        List.map (rotatedPoint model.playerSize model.pos) rads

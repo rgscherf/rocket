@@ -81,7 +81,7 @@ checkCollision model blocks vel =
     case blocks of
         [] ->  vel
         (b::bs) ->
-            if oneCollide (triToPoints model.playerSize model.angle model.pos) b
+            if oneCollide (cirToPoints model) b
             then bounceVel model vel b
             else checkCollision model bs vel 
 
@@ -114,9 +114,9 @@ oneCollide ppoints b =
         bbot    = getY b.pos - halflen
         bleft   = getX b.pos - halflen
         bright  = getX b.pos + halflen
-        isIntersectingX p   = getX p <= bright && getX p >= bleft
-        isIntersectingY p   = getY p <= btop && getY p >= bbot
-        isIntersectingAny p = isIntersectingX p && isIntersectingY p
+        isIntersectingX p   = (getX p < bright) && (getX p > bleft)
+        isIntersectingY p   = (getY p < btop) && (getY p > bbot)
+        isIntersectingAny p = (isIntersectingX p) && (isIntersectingY p)
     in 
         List.any isIntersectingAny ppoints
         
@@ -131,21 +131,21 @@ init =
     , vel        = vec2 0 0
     , angle      = 0
     , viewport   = (windowW, windowH)
-    , playerSize = 30
+    , playerSize = 10
     , blocks = [ Block 30 (vec2 60 60) purple
                , Block 30 (vec2 90 60) purple
                , Block 30 (vec2 120 60) purple
                , Block 30 (vec2 -60 -30) purple
                , Block 30 (vec2 -60 -60) purple
                , Block 30 (vec2 -60 -90) purple
-               , Block 30 (vec2 -400 -100) purple
+               , Block 30 (vec2 -400 -110) purple
                , Block 30 (vec2 -400 -80) purple
                , Block 30 (vec2 -400 -50) purple
                , Block 30 (vec2 -370 -50) purple
                , Block 30 (vec2 -340 -50) purple
                , Block 30 (vec2 -340 -80) purple
-               , Block 30 (vec2 -340 -100) purple
-               , Block 30 (vec2 -370 -100) purple
+               , Block 30 (vec2 -340 -110) purple
+               , Block 30 (vec2 -370 -110) purple
                , Block 30 (vec2 -400 200) purple
                ]
     , debug = True
@@ -170,14 +170,17 @@ render model =
         (
             [ rect (toFloat windowW) (toFloat windowH)
                 |> filled lightGrey
-            , ngon 3 model.playerSize
+            , drawPlayerCir model
                 |> filled green
-                |> rotate model.angle
-                |> move (getX model.pos, getY model.pos)
+                -- |> move (getX model.pos, getY model.pos)
             ]
             ++ List.map drawBlock model.blocks
             ++ debugInfo
         )
+
+drawPlayerCir : Model -> Shape
+drawPlayerCir model =
+    polygon << List.map toTuple <| cirToPoints model
 
 drawBlock : Block -> Form
 drawBlock b = rect b.length b.length

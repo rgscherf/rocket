@@ -9,10 +9,10 @@ import RktTypes exposing (..)
 
 drawDebug : Model -> List Form
 drawDebug model =
-    [ traced (dashed red) <| path 
-        ( List.map toTuple 
-            (triToPoints model.playerSize model.angle model.pos)
-        )
+    [   cirToPoints model
+        |> List.map toTuple
+        >> path
+        >> traced (dashed red)
     ]
     ++ (List.concat (List.map debugBlock model.blocks))
 

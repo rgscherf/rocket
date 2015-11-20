@@ -44,6 +44,7 @@ update : Action -> Model -> Model
 update action model =
     case action of
         Thrust delta ->
+            -- TODO: 1) max speed. 2) this code be ugly!
             let newAngle = if delta /= (0,0)
                            then relativeAngle delta
                            else model.angle
@@ -64,24 +65,23 @@ update action model =
                               else decay
                 newVel = vec2 (getX model.vel + xframeDecay) 
                               (getY model.vel + yframeDecay)
-            in changePos { model 
-                            | vel <- checkCollision model newVel model.blocks 
-                         }
+            in changePos {model| vel <- checkCollision model newVel model.blocks} 
 
 changePos : Model -> Model
 changePos model =
     let newPos = ( add model.pos model.vel )
-    in
-        { model | pos <- (watch "newPos") newPos }
+    in { model | pos <- (watch "newPos") newPos }
 
 checkCollision : Model -> Velocity -> List Block -> Velocity
 checkCollision model vel blocks =
     case blocks of
         [] ->  vel
         (b::bs) ->
-            if oneCollide (cirToPoints model) b
-            then bounceVel model vel b
-            else checkCollision model vel bs 
+            if distance b.pos model.pos > (model.playerSize * 2) 
+            then checkCollision model vel bs
+            else if oneCollide (cirToPoints model) b 
+                then bounceDir model vel b 
+                else checkCollision model vel bs 
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -97,8 +97,8 @@ oneCollide points b =
         didCollide = List.any isIntersectingAny points
     in (watch "didcollide") didCollide
 
-bounceVel : Model -> Velocity -> Block -> Velocity
-bounceVel model vel b =
+bounceDir : Model -> Velocity -> Block -> Velocity
+bounceDir model vel b =
     let halflen = b.length / 2.0
         upos = add b.pos (vec2 0 halflen)
         dpos = add b.pos (vec2 0 (-halflen))
@@ -138,7 +138,7 @@ init =
                -- , Block 30 (vec2 -370 -110) purple
                -- , Block 30 (vec2 -400 200) purple
                -- ]
-    , blocks = parse -600 300 blockMap1
+    , blocks = buildMap -600 300 blockMap1
     , debug = False
     }
 

@@ -1,6 +1,7 @@
 module RktGeo where
 
 import Math.Vector2 exposing (..)
+import String exposing (..)
 
 import RktTypes exposing (..)
 
@@ -35,6 +36,37 @@ rectToPoints length pos =
 
 cirToPoints : Model -> List Vec2
 cirToPoints model =
-    let rads = List.map radians [1..360]
-    in
-        List.map (rotatedPoint model.playerSize model.pos) rads
+    let radInt = List.map radians [1..360]
+    in List.map (rotatedPoint model.playerSize model.pos) radInt
+
+parse : Float -> Float -> String -> List Block
+parse x y str =
+    let xinc = 30
+        yinc = 30
+        h = String.left 1 str
+        t = String.dropLeft 1 str
+    in case h of
+        "." -> parse (x + xinc) y t
+        "n" -> parse 0 (y - yinc) t
+        "0" -> (Block 30 (vec2 x y)) :: parse (x + xinc) y t
+        _   -> []
+
+blockMap1 = "
+00000000000000000000000000000000000000n
+0.......00000000000...................n
+0........00000000.....................n
+0..........0000.......................n
+0...........00...........000000.......n
+0........................000000.......n
+0........................000000.......n
+0........................00..00.......n
+0........................00..00.......n
+0........................000000.......n
+00000000000...........................n
+0000000000000.........................n
+000000000000000.......................n
+00000000000000000.....................n
+00000000000000000.....................n
+00000000000000000000000000000000000000n
+"
+

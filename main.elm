@@ -52,7 +52,7 @@ update action model =
                 newVel = add model.vel newDelta
             in
             changePos { model 
-                          | vel <- checkCollision model model.blocks <| newVel
+                          | vel <- checkCollision model newVel model.blocks 
                           , angle <- newAngle
                       }
         Tick _ ->
@@ -65,61 +65,51 @@ update action model =
                 newVel = vec2 (getX model.vel + xframeDecay) 
                               (getY model.vel + yframeDecay)
             in changePos { model 
-                            | vel <- checkCollision model model.blocks newVel
+                            | vel <- checkCollision model newVel model.blocks 
                          }
 
 changePos : Model -> Model
 changePos model =
     let newPos = ( add model.pos model.vel )
     in
-        { model
-            | pos <- (watch "newPos") newPos
-        }
+        { model | pos <- (watch "newPos") newPos }
 
-checkCollision : Model -> List Block -> Velocity -> Velocity
-checkCollision model blocks vel =
+checkCollision : Model -> Velocity -> List Block -> Velocity
+checkCollision model vel blocks =
     case blocks of
         [] ->  vel
         (b::bs) ->
             if oneCollide (cirToPoints model) b
             then bounceVel model vel b
-            else checkCollision model bs vel 
-
-bounceVel : Model -> Velocity -> Block -> Velocity
-bounceVel model vel b =
-    let upos = fromTuple (getX b.pos, (b.length/2) + getY b.pos)
-        dpos = fromTuple (getX b.pos, (b.length/2) - getY b.pos)
-        rpos = fromTuple ((b.length/2) + getX b.pos, getY b.pos)
-        lpos = fromTuple ((b.length/2) - getX b.pos, getY b.pos)
-        distances = List.map (distance model.pos) [upos, dpos, rpos, lpos]
-        allmin    = List.foldl min 9999 distances
-    in if 
-        allmin == (distance model.pos upos) || 
-        allmin == (distance model.pos dpos)
-            then fromTuple (getX vel, Basics.negate <| getY vel)
-            else fromTuple (Basics.negate <| getX vel, getY vel)
-
--- oneCollide : List Vec2 -> Block -> Bool
--- oneCollide ppoints b =
-    -- let bpoints = rectToPoints b.length b.pos
-        -- didCollide = List.any (flip isInside (fromVectors ppoints)) bpoints
-                  -- || List.any (flip isInside (fromVectors bpoints)) ppoints
-    -- in (watch "didcollide") didCollide
+            else checkCollision model vel bs 
 
 oneCollide : List Vec2 -> Block -> Bool
-oneCollide ppoints b =
+oneCollide points b =
     let
-        halflen = b.length / 2
+        halflen = b.length / 2.0
         btop    = getY b.pos + halflen
         bbot    = getY b.pos - halflen
         bleft   = getX b.pos - halflen
         bright  = getX b.pos + halflen
-        isIntersectingX p   = (getX p < bright) && (getX p > bleft)
-        isIntersectingY p   = (getY p < btop) && (getY p > bbot)
+        isIntersectingX p   = ((getX p) <= bright) && ((getX p) >= bleft)
+        isIntersectingY p   = ((getY p) <= btop) && ((getY p) >= bbot)
         isIntersectingAny p = (isIntersectingX p) && (isIntersectingY p)
-    in 
-        List.any isIntersectingAny ppoints
-        
+        didCollide = List.any isIntersectingAny points
+    in (watch "didcollide") didCollide
+
+bounceVel : Model -> Velocity -> Block -> Velocity
+bounceVel model vel b =
+    let halflen = b.length / 2.0
+        upos = add b.pos (vec2 0 halflen)
+        dpos = add b.pos (vec2 0 (-halflen))
+        rpos = add b.pos (vec2 (-halflen) 0)
+        lpos = add b.pos (vec2 halflen 0)
+    in if 
+        min (distance model.pos upos) (distance model.pos dpos) <
+        min (distance model.pos lpos) (distance model.pos rpos)
+        then vec2 (getX vel) (Basics.negate (getY vel))
+        else vec2 (Basics.negate (getX vel)) (getY vel)
+
 
 --------------------
 -- MODEL
@@ -131,24 +121,25 @@ init =
     , vel        = vec2 0 0
     , angle      = 0
     , viewport   = (windowW, windowH)
-    , playerSize = 10
-    , blocks = [ Block 30 (vec2 60 60) purple
-               , Block 30 (vec2 90 60) purple
-               , Block 30 (vec2 120 60) purple
-               , Block 30 (vec2 -60 -30) purple
-               , Block 30 (vec2 -60 -60) purple
-               , Block 30 (vec2 -60 -90) purple
-               , Block 30 (vec2 -400 -110) purple
-               , Block 30 (vec2 -400 -80) purple
-               , Block 30 (vec2 -400 -50) purple
-               , Block 30 (vec2 -370 -50) purple
-               , Block 30 (vec2 -340 -50) purple
-               , Block 30 (vec2 -340 -80) purple
-               , Block 30 (vec2 -340 -110) purple
-               , Block 30 (vec2 -370 -110) purple
-               , Block 30 (vec2 -400 200) purple
-               ]
-    , debug = True
+    , playerSize = 15
+    -- , blocks = [ Block 30 (vec2 60 60) purple
+               -- , Block 30 (vec2 90 60) purple
+               -- , Block 30 (vec2 120 60) purple
+               -- , Block 30 (vec2 -60 -30) purple
+               -- , Block 30 (vec2 -60 -60) purple
+               -- , Block 30 (vec2 -60 -90) purple
+               -- , Block 30 (vec2 -400 -110) purple
+               -- , Block 30 (vec2 -400 -80) purple
+               -- , Block 30 (vec2 -400 -50) purple
+               -- , Block 30 (vec2 -370 -50) purple
+               -- , Block 30 (vec2 -340 -50) purple
+               -- , Block 30 (vec2 -340 -80) purple
+               -- , Block 30 (vec2 -340 -110) purple
+               -- , Block 30 (vec2 -370 -110) purple
+               -- , Block 30 (vec2 -400 200) purple
+               -- ]
+    , blocks = parse -600 300 blockMap1
+    , debug = False
     }
 
 model : Signal Model
@@ -172,7 +163,6 @@ render model =
                 |> filled lightGrey
             , drawPlayerCir model
                 |> filled green
-                -- |> move (getX model.pos, getY model.pos)
             ]
             ++ List.map drawBlock model.blocks
             ++ debugInfo
@@ -184,7 +174,7 @@ drawPlayerCir model =
 
 drawBlock : Block -> Form
 drawBlock b = rect b.length b.length
-               |> filled b.color
+               |> filled purple
                |> move (toTuple b.pos)
                 
 relativeAngle : (Int,Int) -> Float

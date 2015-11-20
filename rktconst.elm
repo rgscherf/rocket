@@ -13,11 +13,9 @@ windowH = 600
 
 -- acceleration constant
 accel : Float
-accel = 1.5 
+accel = 1.2 
 
 -- deceleration constant
 decay : Float
 decay = 0.02
 
-playerSize : Float
-playerSize = 20

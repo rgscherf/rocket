@@ -19,5 +19,4 @@ type alias Model =
 type alias Block =
     { length : Float
     , pos    : Position
-    , color  : Color
     } 

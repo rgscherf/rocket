@@ -1,5 +1,6 @@
 *.un~
 *.swp
 *.swo
+*.swn
 elm-stuff/*
 elm.js

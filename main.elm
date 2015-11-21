@@ -8,7 +8,6 @@ import Mouse
 import Keyboard exposing (..)
 import Time
 import Math.Vector2 exposing (..)
-import Collision2D exposing (..)
 import Debug exposing (..)
 
 import RktGeo exposing (..)
@@ -70,21 +69,34 @@ clampVel ms vel delta =
 changePos : Model -> Model
 changePos model =
     let newPos = ( add model.pos model.vel )
-    in { model | pos <- (watch "newPos") newPos }
+    in { model | pos <- newPos }
 
 checkCollision : Model -> Velocity -> List Block -> Model
 checkCollision model velocity blocks =
     case blocks of
-        [] ->  {model| vel <- velocity}
+        [] ->  { model
+               | vel <- velocity
+               , colliding <- False
+               }
         (b::bs) ->
             if distance b.pos model.pos > (model.playerSize * 2) 
             then checkCollision model velocity bs
-            else if oneCollide (cirToPoints model) b 
+            else if oneCollide (cirToPoints model) b && (not model.colliding)
                 then { model
                          | vel <- bounceDir model velocity b
                          , colliding <- True
                      }
-                else checkCollision model velocity bs 
+            else if oneCollide (cirToPoints model) b && model.colliding
+                then { model
+                        -- | pos <- findClear model ###
+                        | vel <- bounceDir model velocity b
+                        , colliding <- False
+                     }
+            else checkCollision model velocity bs 
+
+-- findClear : Model -> Block -> Vec2
+-- findClear model block =
+    -- scale model.playerSize <| direction model.pos block.pos
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -97,19 +109,19 @@ oneCollide points b =
         isIntersectingX p   = ((getX p) <= bright) && ((getX p) >= bleft)
         isIntersectingY p   = ((getY p) <= btop) && ((getY p) >= bbot)
         isIntersectingAny p = (isIntersectingX p) && (isIntersectingY p)
-        didCollide = List.any isIntersectingAny points
+        didCollide          = List.any isIntersectingAny points
     in (watch "didcollide") didCollide
 
 bounceDir : Model -> Velocity -> Block -> Velocity
 bounceDir model vel b =
     let halflen = b.length / 2.0
-        upos = add b.pos (vec2 0 halflen)
-        dpos = add b.pos (vec2 0 (-halflen))
-        rpos = add b.pos (vec2 (-halflen) 0)
-        lpos = add b.pos (vec2 halflen 0)
+        utop    = add b.pos (vec2 0 halflen)
+        dtop    = add b.pos (vec2 0 (-halflen))
+        rtop    = add b.pos (vec2 (-halflen) 0)
+        ltop    = add b.pos (vec2 halflen 0)
     in if 
-        min (distance model.pos upos) (distance model.pos dpos) <
-        min (distance model.pos lpos) (distance model.pos rpos)
+        min (distance model.pos utop) (distance model.pos dtop) <=
+        min (distance model.pos ltop) (distance model.pos rtop)
         then vec2 (getX vel) (Basics.negate (getY vel))
             |> Math.Vector2.scale 1.20
         else vec2 (Basics.negate (getX vel)) (getY vel)
@@ -126,7 +138,7 @@ init =
     , vel        = vec2 0 0
     , angle      = 0
     , viewport   = (windowW, windowH)
-    , playerSize = 30
+    , playerSize = 15
     -- , blocks = [ Block 30 (vec2 60 60) purple
                -- , Block 30 (vec2 90 60) purple
                -- , Block 30 (vec2 120 60) purple

@@ -74,24 +74,44 @@ changePos model =
 checkCollision : Model -> Velocity -> List Block -> Model
 checkCollision model velocity blocks =
     case blocks of
-        [] ->  { model
-               | vel <- velocity
-               , colliding <- False
-               }
+        [] ->  { model| vel <- velocity }
         (b::bs) ->
+            -- if candidate block is too far, skip it!
             if distance b.pos model.pos > (model.playerSize * 2) 
-            then checkCollision model velocity bs
-            else if oneCollide (cirToPoints model) b && (not model.colliding)
+                then checkCollision model velocity bs
+            -- else, if the block is colliding,
+            -- return a model with new velocity
+            else if oneCollide (cirToPoints model.pos model.playerSize) b 
                 then { model
-                         | vel <- bounceDir model velocity b
-                         , colliding <- True
+                     | vel <- bounceDir model velocity b
+                     , pos <- add model.pos 
+                                <| nearestClear model.blocks model.pos model.playerSize 5
                      }
-            else if oneCollide (cirToPoints model) b && model.colliding
-                then { model
-                        | vel <- bounceDir model velocity b
-                        , colliding <- False
-                     }
+            -- else, just continue iterating.
             else checkCollision model velocity bs 
+
+nearestClear : List Block -> Vec2 -> Float -> Float -> Vec2
+nearestClear blocks position radius delta =
+    let addmodel a b = 
+        List.any (oneCollide (cirToPoints (add position <| vec2 a b) radius)) blocks
+    in 
+    if not <| addmodel delta 0 then
+        vec2 delta 0
+    else if not <| addmodel -delta 0 then
+        vec2 -delta 0
+    else if not <| addmodel 0 delta then
+        vec2 0 delta
+    else if not <| addmodel 0 -delta then
+        vec2 0 -delta
+    else if not <| addmodel delta delta then
+        vec2 delta delta
+    else if not <| addmodel -delta delta then
+        vec2 -delta delta
+    else if not <| addmodel -delta -delta then
+        vec2 -delta -delta
+    else if not <| addmodel delta -delta then
+        vec2 delta -delta
+    else nearestClear blocks position radius (delta + 5)
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -127,20 +147,27 @@ bounceDir model vel b =
 -- MODEL
 --------------------
 
-init : Model
-init =
+blank : Model
+blank =
     { pos        = vec2 0 0
     , vel        = vec2 0 0
     , angle      = 0
     , viewport   = (windowW, windowH)
-    , playerSize = 15
-    , blocks = buildMap -600 300 blockMap1
+    , playerSize = 10
+    , blocks = []
     , debug = False
     , colliding = False
     }
 
+init : Model -> String -> Model
+init model str = 
+    { model
+    | blocks <- buildMapAuto str
+    , pos <- findPlayerAuto str
+    }
+       
 model : Signal Model
-model = Signal.foldp update init signals
+model = Signal.foldp update (init blank blockMap1) signals
 
 
 --------------------
@@ -167,7 +194,7 @@ render model =
 
 drawPlayerCir : Model -> Shape
 drawPlayerCir model =
-    polygon << List.map toTuple <| cirToPoints model
+    polygon << List.map toTuple <| cirToPoints model.pos model.playerSize
 
 drawBlock : Block -> Form
 drawBlock b = rect b.length b.length

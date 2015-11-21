@@ -9,7 +9,7 @@ import RktTypes exposing (..)
 
 drawDebug : Model -> List Form
 drawDebug model =
-    [   cirToPoints model
+    [   cirToPoints model.pos model.playerSize
         |> List.map toTuple
         >> path
         >> traced (dashed red)

@@ -12,8 +12,8 @@ import Debug exposing (..)
 
 import RktGeo exposing (..)
 import RktConst exposing (..)
-import RktDebug exposing (..)
 import RktTypes exposing (..)
+import RktGraphics exposing (..)
 
 
 --------------------
@@ -23,7 +23,7 @@ import RktTypes exposing (..)
 signals : Signal Action
 signals = Signal.mergeMany
     [ Signal.map (\{x,y} -> Thrust (x,y)) 
-        (Signal.sampleOn (Time.fps 15) Keyboard.wasd)
+        (Signal.sampleOn (Time.fps 30) Keyboard.wasd)
     , Signal.map Tick (Time.fps 60)
     ]
 
@@ -76,18 +76,14 @@ checkCollision model velocity blocks =
     case blocks of
         [] ->  { model| vel <- velocity }
         (b::bs) ->
-            -- if candidate block is too far, skip it!
-            if distance b.pos model.pos > (model.playerSize * 2) 
+            if distance b.pos model.pos > (model.playerSize * 3) 
                 then checkCollision model velocity bs
-            -- else, if the block is colliding,
-            -- return a model with new velocity
             else if oneCollide (cirToPoints model.pos model.playerSize) b 
                 then { model
                      | vel <- bounceDir model velocity b
-                     , pos <- add model.pos 
-                                <| nearestClear model.blocks model.pos model.playerSize 5
+                     , pos <- add model.pos <|
+                            nearestClear model.blocks model.pos model.playerSize 5
                      }
-            -- else, just continue iterating.
             else checkCollision model velocity bs 
 
 nearestClear : List Block -> Vec2 -> Float -> Float -> Vec2
@@ -138,9 +134,7 @@ bounceDir model vel b =
         min (distance model.pos utop) (distance model.pos dtop) <=
         min (distance model.pos ltop) (distance model.pos rtop)
         then vec2 (getX vel) (Basics.negate (getY vel))
-            |> Math.Vector2.scale 1.20
         else vec2 (Basics.negate (getX vel)) (getY vel)
-            |> Math.Vector2.scale 1.20
 
 
 --------------------
@@ -168,49 +162,4 @@ init model str =
        
 model : Signal Model
 model = Signal.foldp update (init blank blockMap1) signals
-
-
---------------------
--- VIEW
---------------------
-
-render : Model -> Element
-render model =
-    let 
-        debugInfo = if model.debug
-                    then drawDebug model
-                    else []
-    in
-        collage windowW windowH 
-        (
-            [ rect (toFloat windowW) (toFloat windowH)
-                |> filled lightGrey
-            , drawPlayerCir model
-                |> filled green
-            ]
-            ++ List.map drawBlock model.blocks
-            ++ debugInfo
-        )
-
-drawPlayerCir : Model -> Shape
-drawPlayerCir model =
-    polygon << List.map toTuple <| cirToPoints model.pos model.playerSize
-
-drawBlock : Block -> Form
-drawBlock b = rect b.length b.length
-               |> filled purple
-               |> move (toTuple b.pos)
-                
-relativeAngle : (Int,Int) -> Float
-relativeAngle motion =
-    case motion of
-        (0,1)     -> pi / 2
-        (0,-1)    -> Basics.negate <| pi / 2
-        (1,0)     -> 0
-        (-1,0)    -> pi
-        (1,1)     -> pi * 0.25
-        (-1,-1)   -> Basics.negate <| pi * 0.75
-        (1,-1)    -> Basics.negate <| pi * 0.25
-        (-1,1)    -> pi * 0.75
-        otherwise -> 0
 

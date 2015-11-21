@@ -52,12 +52,12 @@ buildMap x y str =
         h = String.left 1 str
         t = String.dropLeft 1 str
     in case h of
-        "." -> buildMap (x + xinc) y t
-        "n" -> buildMap -600 (y - yinc) t
-        "0" -> (Block 30 (vec2 x y)) :: buildMap (x + xinc) y t
+        "."  -> buildMap (x + xinc) y t
+        "n"  -> buildMap -600 (y - yinc) t
+        "0"  -> (Block 30 (vec2 x y)) :: buildMap (x + xinc) y t
         "\n" -> buildMap x y t
-        "P" -> buildMap (x + xinc) y t
-        _   -> []
+        "P"  -> buildMap (x + xinc) y t
+        _    -> []
 
 findPlayerAuto : String -> Vec2 
 findPlayerAuto str = findPlayer
@@ -72,9 +72,9 @@ findPlayer x y str =
         t = String.dropLeft 1 str
     in case h of
         "\n" -> findPlayer x y t
-        "n" -> findPlayer -600 (y - yinc) t
-        "P" -> vec2 x y
-        _ -> findPlayer (x + xinc) y t
+        "n"  -> findPlayer -600 (y - yinc) t
+        "P"  -> vec2 x y
+        _    -> findPlayer (x + xinc) y t
 
 blockMap1 = "
 0000000000000000000000000000000000000000n

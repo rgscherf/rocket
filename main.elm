@@ -88,15 +88,10 @@ checkCollision model velocity blocks =
                      }
             else if oneCollide (cirToPoints model) b && model.colliding
                 then { model
-                        -- | pos <- findClear model ###
                         | vel <- bounceDir model velocity b
                         , colliding <- False
                      }
             else checkCollision model velocity bs 
-
--- findClear : Model -> Block -> Vec2
--- findClear model block =
-    -- scale model.playerSize <| direction model.pos block.pos
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -139,22 +134,6 @@ init =
     , angle      = 0
     , viewport   = (windowW, windowH)
     , playerSize = 15
-    -- , blocks = [ Block 30 (vec2 60 60) purple
-               -- , Block 30 (vec2 90 60) purple
-               -- , Block 30 (vec2 120 60) purple
-               -- , Block 30 (vec2 -60 -30) purple
-               -- , Block 30 (vec2 -60 -60) purple
-               -- , Block 30 (vec2 -60 -90) purple
-               -- , Block 30 (vec2 -400 -110) purple
-               -- , Block 30 (vec2 -400 -80) purple
-               -- , Block 30 (vec2 -400 -50) purple
-               -- , Block 30 (vec2 -370 -50) purple
-               -- , Block 30 (vec2 -340 -50) purple
-               -- , Block 30 (vec2 -340 -80) purple
-               -- , Block 30 (vec2 -340 -110) purple
-               -- , Block 30 (vec2 -370 -110) purple
-               -- , Block 30 (vec2 -400 200) purple
-               -- ]
     , blocks = buildMap -600 300 blockMap1
     , debug = False
     , colliding = False

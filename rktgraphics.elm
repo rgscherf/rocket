@@ -28,6 +28,7 @@ render model =
             , drawPlayerCir model
                 |> filled green
             ]
+            ++ List.map (drawTrail model) model.trail
             ++ List.map drawBlock model.blocks
             ++ debugInfo
         )
@@ -41,6 +42,12 @@ drawBlock b = rect b.length b.length
                |> filled purple
                |> move (toTuple b.pos)
 
+drawTrail : Model -> (Int, Vec2) -> Form
+drawTrail model trail =
+    circle model.playerSize
+        |> filled lightGreen
+        |> alpha (1 - (toFloat (fst trail) / toFloat trailLength))
+        |> move (toTuple <| snd trail)
 
 -----------------
 -- STILL NEEDED??

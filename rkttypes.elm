@@ -14,7 +14,7 @@ type alias Model =
     , playerSize : Float
     , blocks     : List Block
     , debug      : Bool
-    , colliding  : Bool
+    , trail      : List (Int, Vec2)
     }
 
 type alias Block =

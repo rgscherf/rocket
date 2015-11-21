@@ -69,7 +69,15 @@ clampVel ms vel delta =
 changePos : Model -> Model
 changePos model =
     let newPos = ( add model.pos model.vel )
-    in { model | pos <- newPos }
+    in { model 
+       | pos <- newPos 
+       , trail <- addTrail model.trail model.pos
+       }
+
+addTrail : List (Int, Vec2) -> Vec2 -> List (Int, Vec2)
+addTrail list pos =
+   let shortlist = List.map snd (List.take (trailLength - 1) list)
+   in List.map2 (,) [1..100] <| pos :: shortlist
 
 checkCollision : Model -> Velocity -> List Block -> Model
 checkCollision model velocity blocks =
@@ -136,7 +144,6 @@ bounceDir model vel b =
         then vec2 (getX vel) (Basics.negate (getY vel))
         else vec2 (Basics.negate (getX vel)) (getY vel)
 
-
 --------------------
 -- MODEL
 --------------------
@@ -148,9 +155,9 @@ blank =
     , angle      = 0
     , viewport   = (windowW, windowH)
     , playerSize = 10
-    , blocks = []
-    , debug = False
-    , colliding = False
+    , blocks     = []
+    , debug      = False
+    , trail     = []
     }
 
 init : Model -> String -> Model

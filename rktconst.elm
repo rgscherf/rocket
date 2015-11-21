@@ -17,7 +17,10 @@ accel = 1.5
 
 -- deceleration constant
 decay : Float
-decay = 0.02
+decay = 0.03
 
 maxSpeed : Float
 maxSpeed = 5
+
+trailLength : Int
+trailLength = 30

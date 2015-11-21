@@ -44,18 +44,13 @@ update : Action -> Model -> Model
 update action model =
     case action of
         Thrust delta ->
-            -- TODO: 1) max speed. 2) this code be ugly!
-            let newAngle = if delta /= (0,0)
-                           then relativeAngle delta
-                           else model.angle
-                newDelta = vec2 (fst delta |> toFloat)
+            let
+                newDelta = vec2 (fst delta |> toFloat) 
                                 (snd delta |> toFloat)
-                newVel = add model.vel newDelta
-            in
-            changePos { model 
-                          | vel <- checkCollision model newVel model.blocks 
-                          , angle <- newAngle
-                      }
+                ms     = maxSpeed
+                nms    = Basics.negate maxSpeed
+                newVel = clampVel maxSpeed model.vel newDelta
+            in changePos <| checkCollision model newVel model.blocks
         Tick _ ->
             let xframeDecay = if getX model.vel > 0
                               then decay * (-1)
@@ -63,25 +58,33 @@ update action model =
                 yframeDecay = if getY model.vel > 0
                               then decay * (-1)
                               else decay
-                newVel = vec2 (getX model.vel + xframeDecay) 
-                              (getY model.vel + yframeDecay)
-            in changePos {model| vel <- checkCollision model newVel model.blocks} 
+                frameDecay = vec2 xframeDecay yframeDecay
+                newVel = clampVel maxSpeed model.vel frameDecay
+            in changePos <| checkCollision model newVel model.blocks
+
+clampVel : Float -> Vec2 -> Vec2 -> Vec2
+clampVel ms vel delta =
+    vec2 ( clamp (Basics.negate ms) ms (getX vel + getX delta) )
+         ( clamp (Basics.negate ms) ms (getY vel + getY delta) )
 
 changePos : Model -> Model
 changePos model =
     let newPos = ( add model.pos model.vel )
     in { model | pos <- (watch "newPos") newPos }
 
-checkCollision : Model -> Velocity -> List Block -> Velocity
-checkCollision model vel blocks =
+checkCollision : Model -> Velocity -> List Block -> Model
+checkCollision model velocity blocks =
     case blocks of
-        [] ->  vel
+        [] ->  {model| vel <- velocity}
         (b::bs) ->
             if distance b.pos model.pos > (model.playerSize * 2) 
-            then checkCollision model vel bs
+            then checkCollision model velocity bs
             else if oneCollide (cirToPoints model) b 
-                then bounceDir model vel b 
-                else checkCollision model vel bs 
+                then { model
+                         | vel <- bounceDir model velocity b
+                         , colliding <- True
+                     }
+                else checkCollision model velocity bs 
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -108,7 +111,9 @@ bounceDir model vel b =
         min (distance model.pos upos) (distance model.pos dpos) <
         min (distance model.pos lpos) (distance model.pos rpos)
         then vec2 (getX vel) (Basics.negate (getY vel))
+            |> Math.Vector2.scale 1.20
         else vec2 (Basics.negate (getX vel)) (getY vel)
+            |> Math.Vector2.scale 1.20
 
 
 --------------------
@@ -121,7 +126,7 @@ init =
     , vel        = vec2 0 0
     , angle      = 0
     , viewport   = (windowW, windowH)
-    , playerSize = 15
+    , playerSize = 30
     -- , blocks = [ Block 30 (vec2 60 60) purple
                -- , Block 30 (vec2 90 60) purple
                -- , Block 30 (vec2 120 60) purple
@@ -140,6 +145,7 @@ init =
                -- ]
     , blocks = buildMap -600 300 blockMap1
     , debug = False
+    , colliding = False
     }
 
 model : Signal Model

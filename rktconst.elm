@@ -13,9 +13,11 @@ windowH = 600
 
 -- acceleration constant
 accel : Float
-accel = 1.2 
+accel = 1.5 
 
 -- deceleration constant
 decay : Float
 decay = 0.02
 
+maxSpeed : Float
+maxSpeed = 5

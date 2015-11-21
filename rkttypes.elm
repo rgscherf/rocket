@@ -14,6 +14,7 @@ type alias Model =
     , playerSize : Float
     , blocks     : List Block
     , debug      : Bool
+    , colliding  : Bool
     }
 
 type alias Block =

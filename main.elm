@@ -175,8 +175,8 @@ blank =
     , playerSize = 8
     , blocks     = []
     , debug      = False
-    , trail     = []
-    , paused = False
+    , trail      = []
+    , paused     = False
     }
 
 init : Model -> String -> Model

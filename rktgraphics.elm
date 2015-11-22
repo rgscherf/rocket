@@ -37,10 +37,21 @@ drawPlayerCir : Model -> Shape
 drawPlayerCir model =
     polygon << List.map toTuple <| cirToPoints model.pos model.playerSize
 
-drawBlock : Block -> Form
-drawBlock b = rect b.length b.length
-               |> filled purple
-               |> move (toTuple b.pos)
+drawBlock : Object -> Form
+drawBlock block = 
+    case block of
+        Blk b ->
+            rect b.length b.length
+                       |> filled purple
+                       |> move (toTuple b.pos)
+        -- Slow block ->
+            -- rect b.length b.length
+                       -- |> filled purple
+                       -- |> move (toTuple b.pos)
+        Exit b ->
+            rect b.length b.length
+                       |> filled purple
+                       |> move (toTuple b.pos)
 
 drawTrail : Model -> (Int, Vec2) -> Form
 drawTrail model trail =
@@ -79,18 +90,28 @@ drawDebug model =
     ]
     ++ (List.concat (List.map debugBlock model.blocks))
 
-debugBlock : Block -> List Form
-debugBlock b = 
+debugBlock : Object -> List Form
+debugBlock block = 
     let
-        left   = (getX b.pos - (b.length /2), getY b.pos)
-        right  = (getX b.pos + (b.length /2), getY b.pos)
-        top    = (getX b.pos, getY b.pos + (b.length / 2))
-        bottom = (getX b.pos, getY b.pos - (b.length / 2))
+        left b   = (getX b.pos - (b.length /2), getY b.pos)
+        right b  = (getX b.pos + (b.length /2), getY b.pos)
+        top b    = (getX b.pos, getY b.pos + (b.length / 2))
+        bottom b = (getX b.pos, getY b.pos - (b.length / 2))
     in
-    [ traced (dashed red)
-        <| path (List.map toTuple (rectToPoints b.length b.pos))
-    ]
-    ++ List.map 
-        (\c -> traced (dashed red) <| segment (toTuple b.pos) c) 
-        [left, right, top, bottom]
+    case block of
+        Blk b ->
+            [ traced (dashed red)
+                <| path (List.map toTuple (rectToPoints b.length b.pos))
+            ]
+            ++ List.map 
+                (\c -> traced (dashed red) <| segment (toTuple b.pos) c) 
+                [left b, right b, top b, bottom b]
+        Exit b ->
+            [ traced (dashed red)
+                <| path (List.map toTuple (rectToPoints b.length b.pos))
+            ]
+            ++ List.map 
+                (\c -> traced (dashed red) <| segment (toTuple b.pos) c) 
+                [left b, right b, top b, bottom b]
+                
                 

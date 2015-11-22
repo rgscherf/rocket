@@ -154,7 +154,7 @@ blank =
     , vel        = vec2 0 0
     , angle      = 0
     , viewport   = (windowW, windowH)
-    , playerSize = 10
+    , playerSize = 8
     , blocks     = []
     , debug      = False
     , trail     = []
@@ -162,11 +162,13 @@ blank =
 
 init : Model -> String -> Model
 init model str = 
+    let thismap = getLevel str
+    in
     { model
-    | blocks <- buildMapAuto str
-    , pos <- findPlayerAuto str
+    | blocks <- snd thismap
+    , pos <- fst thismap
     }
        
 model : Signal Model
-model = Signal.foldp update (init blank blockMap1) signals
+model = Signal.foldp update (init blank blockMap2) signals
 

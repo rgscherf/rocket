@@ -13,14 +13,14 @@ windowH = 600
 
 -- acceleration constant
 accel : Float
-accel = 1.5 
+accel = 1.3 
 
 -- deceleration constant
 decay : Float
-decay = 0.03
+decay = 0.035
 
 maxSpeed : Float
-maxSpeed = 5
+maxSpeed = 4.5
 
 trailLength : Int
 trailLength = 30

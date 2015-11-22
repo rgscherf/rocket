@@ -15,7 +15,6 @@ rotatedPoint radius pos angle =
     in vec2 newx newy
 
 triRadius : Float -> Float
--- triRadius length = length / (sqrt 3)
 triRadius length = length * 0.9
 
 triToPoints : Float -> Float -> Vec2 -> List Vec2
@@ -54,10 +53,12 @@ buildMap x y str =
     in case h of
         "."  -> buildMap (x + xinc) y t
         "n"  -> buildMap -600 (y - yinc) t
-        "0"  -> (Block 30 (vec2 x y)) :: buildMap (x + xinc) y t
+        "0"  -> defaultBlock x y :: buildMap (x + xinc) y t
         "\n" -> buildMap x y t
         "P"  -> buildMap (x + xinc) y t
         _    -> []
+
+
 
 findPlayerAuto : String -> Vec2 
 findPlayerAuto str = findPlayer

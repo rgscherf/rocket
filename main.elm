@@ -25,11 +25,14 @@ signals = Signal.mergeMany
     [ Signal.map (\{x,y} -> Thrust (x,y)) 
         (Signal.sampleOn (Time.fps 30) Keyboard.wasd)
     , Signal.map Tick (Time.fps 60)
+    , Signal.map (\k -> if k then Pause else NoOp) Keyboard.space
     ]
 
 type Action
     = Thrust (Int,Int)
     | Tick Float
+    | Pause
+    | NoOp
 
 main : Signal Element
 main = Signal.map render model
@@ -42,6 +45,7 @@ main = Signal.map render model
 update : Action -> Model -> Model
 update action model =
     case action of
+        NoOp -> model
         Thrust delta ->
             let
                 newDelta = vec2 (fst delta |> toFloat) 
@@ -49,7 +53,13 @@ update action model =
                 ms     = maxSpeed
                 nms    = Basics.negate maxSpeed
                 newVel = clampVel maxSpeed model.vel newDelta
-            in changePos <| checkCollision model newVel model.blocks
+            in
+                if model.paused
+                then model
+                else 
+                    checkCollision model newVel model.blocks
+                    |> changePos
+
         Tick _ ->
             let xframeDecay = if getX model.vel > 0
                               then decay * (-1)
@@ -59,7 +69,15 @@ update action model =
                               else decay
                 frameDecay = vec2 xframeDecay yframeDecay
                 newVel = clampVel maxSpeed model.vel frameDecay
-            in changePos <| checkCollision model newVel model.blocks
+            in 
+                if model.paused
+                then model
+                else 
+                    checkCollision model newVel model.blocks
+                    |> changePos
+
+        Pause ->
+            {model| paused <- not model.paused}
 
 clampVel : Float -> Vec2 -> Vec2 -> Vec2
 clampVel ms vel delta =
@@ -158,6 +176,7 @@ blank =
     , blocks     = []
     , debug      = False
     , trail     = []
+    , paused = False
     }
 
 init : Model -> String -> Model

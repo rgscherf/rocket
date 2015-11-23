@@ -12,29 +12,20 @@ type alias Model =
     , angle      : Float
     , viewport   : (Int, Int)
     , playerSize : Float
-    , blocks     : List Object
+    , blocks     : List Block
     , debug      : Bool
     , trail      : List (Int, Vec2)
     , paused : Bool
     }
 
-type Object
-    = Blk Block
-    -- | Slow SlowPad
-    | Exit ExitPad
-
-type alias Collision = Maybe Object
+type Tile
+    = Wall
+    | SlowPad
+    | ExitPad
 
 type alias Block =
     { length : Float
-    , pos    : Position
-    } 
-type alias SlowPad =
-    { length : Float
-    , pos    : Position
-    } 
-type alias ExitPad = 
-    { length : Float
+    , tile   : Tile
     , pos    : Position
     } 
 
@@ -42,4 +33,4 @@ defaultBlock : Float -> Float -> Block
 defaultBlock x y =
     let length = 30
         half   = length / 2
-    in Block length <| vec2 (x + half) (y - half)
+    in Block length Wall <| vec2 (x + half) (y - half) 

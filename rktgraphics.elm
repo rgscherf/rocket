@@ -24,7 +24,7 @@ render model =
         collage windowW windowH 
         (
             [ rect (toFloat windowW) (toFloat windowH)
-                |> filled (if model.paused then charcoal else lightGrey)
+                |> filled (if model.paused then lightRed else lightGrey)
             , drawPlayerCir model
                 |> filled green
             ]

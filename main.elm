@@ -50,8 +50,8 @@ update action model =
             let
                 newDelta = vec2 (fst delta |> toFloat) 
                                 (snd delta |> toFloat)
-                ms     = maxSpeed
-                nms    = Basics.negate maxSpeed
+                -- ms     = maxSpeed
+                -- nms    = Basics.negate maxSpeed
                 newVel = clampVel maxSpeed model.vel newDelta
                 collided = getCollision model newVel model.blocks
             in

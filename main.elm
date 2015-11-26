@@ -53,13 +53,11 @@ update action model =
                 ms     = maxSpeed
                 nms    = Basics.negate maxSpeed
                 newVel = clampVel maxSpeed model.vel newDelta
+                collided = getCollision model newVel model.blocks
             in
                 if model.paused
                 then model
-                else 
-                    checkCollision model newVel model.blocks
-                    |> changePos
-
+                else newModel model newVel collided
         Tick _ ->
             let xframeDecay = if getX model.vel > 0
                               then decay * (-1)
@@ -69,15 +67,25 @@ update action model =
                               else decay
                 frameDecay = vec2 xframeDecay yframeDecay
                 newVel = clampVel maxSpeed model.vel frameDecay
+                collided = getCollision model newVel model.blocks
             in 
                 if model.paused
                 then model
-                else 
-                    checkCollision model newVel model.blocks
-                    |> changePos
-
+                else newModel model newVel collided
         Pause ->
             {model| paused <- not model.paused}
+
+newModel : Model -> Velocity -> Maybe Block -> Model
+newModel model newVel collided =
+    case collided of
+        Nothing -> changePos <| {model| vel <- newVel}
+        Just b ->
+            case b.tile of
+                Wall -> changePos <| { model
+                                     | vel <- bounceDir model newVel b
+                                     , pos <- add model.pos <|
+                                        nearestClear model.blocks model.pos model.playerSize 5
+                                     }
 
 clampVel : Float -> Vec2 -> Vec2 -> Vec2
 clampVel ms vel delta =
@@ -92,25 +100,16 @@ changePos model =
        , trail <- addTrail model.trail model.pos
        }
 
-addTrail : List (Int, Vec2) -> Vec2 -> List (Int, Vec2)
-addTrail list pos =
-   let shortlist = List.map snd (List.take (trailLength - 1) list)
-   in List.map2 (,) [1..100] <| pos :: shortlist
-
-checkCollision : Model -> Velocity -> List Block -> Model
-checkCollision model velocity blocks =
+getCollision : Model -> Velocity -> List Block -> Maybe Block
+getCollision model velocity blocks =
     case blocks of
-        [] ->  { model| vel <- velocity }
+        [] ->  Nothing
         (b::bs) ->
             if distance b.pos model.pos > (model.playerSize * 3) 
-                then checkCollision model velocity bs
+                then getCollision model velocity bs
             else if oneCollide (cirToPoints model.pos model.playerSize) b 
-                then { model
-                     | vel <- bounceDir model velocity b
-                     , pos <- add model.pos <|
-                            nearestClear model.blocks model.pos model.playerSize 5
-                     }
-            else checkCollision model velocity bs 
+                then Just b
+            else getCollision model velocity bs 
 
 nearestClear : List Block -> Vec2 -> Float -> Float -> Vec2
 nearestClear blocks position radius delta =
@@ -161,6 +160,12 @@ bounceDir model vel b =
         min (distance model.pos ltop) (distance model.pos rtop)
         then vec2 (getX vel) (Basics.negate (getY vel))
         else vec2 (Basics.negate (getX vel)) (getY vel)
+
+addTrail : List (Int, Vec2) -> Vec2 -> List (Int, Vec2)
+addTrail list pos =
+   let shortlist = List.map snd (List.take (trailLength - 1) list)
+   in List.map2 (,) [1..100] <| pos :: shortlist
+
 
 --------------------
 -- MODEL

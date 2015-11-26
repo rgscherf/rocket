@@ -39,9 +39,13 @@ drawPlayerCir model =
 
 drawBlock : Block -> Form
 drawBlock b = 
+    let color = case b.tile of
+                    Wall -> purple
+                    SlowPad -> orange
+    in
     rect b.length b.length
-               |> filled purple
-               |> move (toTuple b.pos)
+       |> filled color
+       |> move (toTuple b.pos)
 
 drawTrail : Model -> (Int, Vec2) -> Form
 drawTrail model trail =

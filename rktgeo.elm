@@ -53,12 +53,11 @@ buildMap x y str =
     in case h of
         "."  -> buildMap (x + xinc) y t
         "n"  -> buildMap -600 (y - yinc) t
-        "0"  -> defaultBlock x y :: buildMap (x + xinc) y t
+        "0"  -> defaultBlock Wall x y :: buildMap (x + xinc) y t
+        "S"  -> defaultBlock SlowPad x y :: buildMap (x + xinc) y t
         "\n" -> buildMap x y t
         "P"  -> buildMap (x + xinc) y t
         _    -> []
-
-
 
 findPlayerAuto : String -> Vec2 
 findPlayerAuto str = findPlayer
@@ -123,7 +122,7 @@ blockMap2 = "
 0...........00...00000000..............0n
 0...00000...00...00000000....00000.....0n
 0............................00000.....0n
-0............................00000.....0n
+0.S..........................00000.....0n
 0000000000000000000000000000000000000000n
 "
 blankMap = "

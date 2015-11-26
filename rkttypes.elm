@@ -29,8 +29,8 @@ type alias Block =
     , pos    : Position
     } 
 
-defaultBlock : Float -> Float -> Block
-defaultBlock x y =
+defaultBlock : Tile -> Float -> Float -> Block
+defaultBlock t x y =
     let length = 30
         half   = length / 2
-    in Block length Wall <| vec2 (x + half) (y - half) 
+    in Block length t <| vec2 (x + half) (y - half) 

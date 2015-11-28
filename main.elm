@@ -77,15 +77,25 @@ update action model =
 
 newModel : Model -> Velocity -> Maybe Block -> Model
 newModel model newVel collided =
+    let noCollision = changePos <| {model| vel <- newVel}
+    in
     case collided of
-        Nothing -> changePos <| {model| vel <- newVel}
+        Nothing -> noCollision
         Just b ->
             case b.tile of
                 Wall -> changePos <| { model
                                      | vel <- bounceDir model newVel b
                                      , pos <- add model.pos <|
                                         nearestClear model.blocks model.pos model.playerSize 5
+                                     , slowed <- False
                                      }
+                SlowPad -> if model.slowed
+                           then noCollision
+                           else changePos <| { model
+                                             | vel <- Math.Vector2.scale 0.3 newVel
+                                             , slowed <- True
+                                             }
+
 
 clampVel : Float -> Vec2 -> Vec2 -> Vec2
 clampVel ms vel delta =
@@ -182,6 +192,7 @@ blank =
     , debug      = False
     , trail      = []
     , paused     = False
+    , slowed = False
     }
 
 init : Model -> String -> Model

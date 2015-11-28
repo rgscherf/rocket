@@ -25,11 +25,15 @@ render model =
         (
             [ rect (toFloat windowW) (toFloat windowH)
                 |> filled (if model.paused then lightRed else lightGrey)
-            , drawPlayerCir model
+            ]
+            ++
+            List.map drawBlock model.blocks
+            ++
+            [
+            drawPlayerCir model
                 |> filled green
             ]
             ++ List.map (drawTrail model) model.trail
-            ++ List.map drawBlock model.blocks
             ++ debugInfo
         )
 

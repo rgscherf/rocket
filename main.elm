@@ -70,7 +70,9 @@ update action model =
             in 
                 if model.paused
                 then model
-                else updateModel {model| time <- model.time + delta} newVel collided
+                else if model.finalMap
+                    then updateModel model newVel collided
+                    else updateModel {model| time <- model.time + delta} newVel collided
         Pause ->
             {model| paused <- not model.paused}
 
@@ -186,8 +188,8 @@ addTrail list pos =
 -- MODEL
 --------------------
 
-blank : Model
-blank =
+initModel : Model
+initModel =
     { pos        = vec2 0 0
     , vel        = vec2 0 0
     , angle      = 0
@@ -199,7 +201,13 @@ blank =
     , paused     = False
     , slowed     = False
     , time       = 0
-    , maps       = [map1, map2, map3]
+    , maps       = [ 
+                     map1
+                   , map2
+                   , map3
+                   , finalMap
+                   ]
+    , finalMap   = False
     }
 
 loadNext : Model -> Model
@@ -211,14 +219,25 @@ loadNext model =
                Just a -> a
     in
         case h of
-            Nothing -> blank
-            Just str -> { blank
-                        | blocks <- snd <| getLevel str
-                        , pos <- fst <| getLevel str
-                        , maps <- t
-                        , time <- model.time
-                        }
+            Nothing -> initModel
+            Just str -> 
+                if str == finalMap
+                then
+                    { initModel
+                    | blocks <- snd <| getLevel str
+                    , pos <- fst <| getLevel str
+                    , maps <- t
+                    , time <- model.time
+                    , finalMap <- True
+                    }
+                else
+                    { initModel
+                    | blocks <- snd <| getLevel str
+                    , pos <- fst <| getLevel str
+                    , maps <- t
+                    , time <- model.time
+                    }
 
 model : Signal Model
-model = Signal.foldp update (loadNext blank) signals
+model = Signal.foldp update (loadNext initModel) signals
 

@@ -19,6 +19,7 @@ type alias Model =
     , slowed     : Bool
     , time       : Float
     , maps       : List String
+    , finalMap : Bool
     }
 
 type Tile

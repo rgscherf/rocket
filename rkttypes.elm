@@ -17,6 +17,7 @@ type alias Model =
     , trail      : List (Int, Vec2)
     , paused : Bool
     , slowed : Bool
+    , time : Float
     }
 
 type Tile

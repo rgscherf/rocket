@@ -4,14 +4,27 @@ import Color exposing (..)
 import Graphics.Element exposing (..)
 import Graphics.Collage exposing (..)
 import Math.Vector2 exposing (..)
+import Text exposing (..)
 
 import RktTypes exposing (..)
 import RktConst exposing (..)
 import RktGeo exposing (..)
 
+-----------------
+-- COLOUR PALETTE
+-----------------
+
+background   = lightGrey
+paused       = lightRed
+wallColor    = purple
+slowActive   = orange
+slowInactive = darkGrey
+player       = green
+playerTrail  = lightGreen
+textColour = white
 
 -----------------
--- BASIC RENDER
+-- RENDERING
 -----------------
 
 render : Model -> Element
@@ -24,28 +37,36 @@ render model =
         collage windowW windowH 
         (
             [ rect (toFloat windowW) (toFloat windowH)
-                |> filled (if model.paused then lightRed else lightGrey)
+                |> filled (if model.paused then paused else background)
             ]
+            ++ List.map (drawBlock model) model.blocks
             ++
-            List.map drawBlock model.blocks
-            ++
-            [
-            drawPlayerCir model
-                |> filled green
-            ]
+                [ drawPlayerCir model
+                    |> filled player
+                ]
             ++ List.map (drawTrail model) model.trail
             ++ debugInfo
+            ++
+               [ fromString ("TIME : " ++ toString (model.time / 1000))
+                   |> Text.height 40
+                   |> Text.color textColour
+                   |> italic
+                 |> text
+                 |> move (0, (toFloat windowH/2) - 10)
+               ]
         )
 
 drawPlayerCir : Model -> Shape
 drawPlayerCir model =
     polygon << List.map toTuple <| cirToPoints model.pos model.playerSize
 
-drawBlock : Block -> Form
-drawBlock b = 
+drawBlock : Model -> Block -> Form
+drawBlock m b = 
     let color = case b.tile of
-                    Wall -> purple
-                    SlowPad -> orange
+                    Wall -> wallColor
+                    SlowPad -> if m.slowed
+                               then slowInactive
+                               else slowActive
     in
     rect b.length b.length
        |> filled color
@@ -54,7 +75,7 @@ drawBlock b =
 drawTrail : Model -> (Int, Vec2) -> Form
 drawTrail model trail =
     circle model.playerSize
-        |> filled lightGreen
+        |> filled playerTrail
         |> alpha (1 - (toFloat (fst trail) / toFloat trailLength))
         |> move (toTuple <| snd trail)
 

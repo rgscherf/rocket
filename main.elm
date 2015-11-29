@@ -50,15 +50,13 @@ update action model =
             let
                 newDelta = vec2 (fst delta |> toFloat) 
                                 (snd delta |> toFloat)
-                -- ms     = maxSpeed
-                -- nms    = Basics.negate maxSpeed
                 newVel = clampVel maxSpeed model.vel newDelta
                 collided = getCollision model newVel model.blocks
             in
                 if model.paused
                 then model
                 else newModel model newVel collided
-        Tick _ ->
+        Tick delta ->
             let xframeDecay = if getX model.vel > 0
                               then decay * (-1)
                               else decay
@@ -71,7 +69,7 @@ update action model =
             in 
                 if model.paused
                 then model
-                else newModel model newVel collided
+                else newModel {model| time <- model.time + delta} newVel collided
         Pause ->
             {model| paused <- not model.paused}
 
@@ -92,7 +90,7 @@ newModel model newVel collided =
                 SlowPad -> if model.slowed
                            then noCollision
                            else changePos <| { model
-                                             | vel <- Math.Vector2.scale 0.3 newVel
+                                             | vel <- Math.Vector2.scale slowScale newVel
                                              , slowed <- True
                                              }
 
@@ -122,9 +120,9 @@ getCollision model velocity blocks =
             else getCollision model velocity bs 
 
 nearestClear : List Block -> Vec2 -> Float -> Float -> Vec2
-nearestClear blocks position radius delta =
-    let addmodel a b = 
-        List.any (oneCollide (cirToPoints (add position <| vec2 a b) radius)) blocks
+nearestClear blocks position radius delta  =
+    let addmodel a b = List.any (oneCollide (cirToPoints (add position <| vec2 a b) radius)) wallBlocks
+        wallBlocks = (watch "current blocks") List.filter (\b -> b.tile == Wall) blocks
     in 
     if not <| addmodel delta 0 then
         vec2 delta 0
@@ -142,7 +140,7 @@ nearestClear blocks position radius delta =
         vec2 -delta -delta
     else if not <| addmodel delta -delta then
         vec2 delta -delta
-    else nearestClear blocks position radius (delta + 5)
+    else nearestClear blocks position radius (delta + 5) 
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -156,7 +154,7 @@ oneCollide points b =
         isIntersectingY p   = ((getY p) <= btop) && ((getY p) >= bbot)
         isIntersectingAny p = (isIntersectingX p) && (isIntersectingY p)
         didCollide          = List.any isIntersectingAny points
-    in (watch "didcollide") didCollide
+    in didCollide
 
 bounceDir : Model -> Velocity -> Block -> Velocity
 bounceDir model vel b =
@@ -192,7 +190,8 @@ blank =
     , debug      = False
     , trail      = []
     , paused     = False
-    , slowed = False
+    , slowed     = False
+    , time       = 0
     }
 
 init : Model -> String -> Model

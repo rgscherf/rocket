@@ -55,9 +55,10 @@ update action model =
             in
                 if model.paused
                 then model
-                else newModel model newVel collided
+                else updateModel model newVel collided
         Tick delta ->
-            let xframeDecay = if getX model.vel > 0
+            let 
+                xframeDecay = if getX model.vel > 0
                               then decay * (-1)
                               else decay
                 yframeDecay = if getY model.vel > 0
@@ -69,31 +70,35 @@ update action model =
             in 
                 if model.paused
                 then model
-                else newModel {model| time <- model.time + delta} newVel collided
+                else updateModel {model| time <- model.time + delta} newVel collided
         Pause ->
             {model| paused <- not model.paused}
 
-newModel : Model -> Velocity -> Maybe Block -> Model
-newModel model newVel collided =
-    let noCollision = changePos <| {model| vel <- newVel}
+updateModel : Model -> Velocity -> Maybe Block -> Model
+updateModel model newVel collided =
+    let 
+        noCollision = changePos <| {model| vel <- newVel}
     in
-    case collided of
-        Nothing -> noCollision
-        Just b ->
-            case b.tile of
-                Wall -> changePos <| { model
-                                     | vel <- bounceDir model newVel b
-                                     , pos <- add model.pos <|
-                                        nearestClear model.blocks model.pos model.playerSize 5
-                                     , slowed <- False
-                                     }
-                SlowPad -> if model.slowed
-                           then noCollision
-                           else changePos <| { model
-                                             | vel <- Math.Vector2.scale slowScale newVel
-                                             , slowed <- True
-                                             }
-
+        case collided of
+            Nothing -> noCollision
+            Just b ->
+                case b.tile of
+                    Wall -> 
+                        { model
+                        | vel <- bounceDir model newVel b
+                        , pos <- add model.pos <|
+                            nearestClear model.blocks model.pos model.playerSize 5
+                        , slowed <- False
+                        }
+                    SlowPad -> 
+                        if model.slowed
+                        then noCollision
+                        else changePos <| { model
+                                          | vel <- Math.Vector2.scale slowScale newVel
+                                          , slowed <- True
+                                          }
+                    ExitPad ->
+                        loadNext model
 
 clampVel : Float -> Vec2 -> Vec2 -> Vec2
 clampVel ms vel delta =
@@ -121,26 +126,27 @@ getCollision model velocity blocks =
 
 nearestClear : List Block -> Vec2 -> Float -> Float -> Vec2
 nearestClear blocks position radius delta  =
-    let addmodel a b = List.any (oneCollide (cirToPoints (add position <| vec2 a b) radius)) wallBlocks
-        wallBlocks = (watch "current blocks") List.filter (\b -> b.tile == Wall) blocks
+    let 
+        addmodel a b = List.any (oneCollide (cirToPoints (add position <| vec2 a b) radius)) wallBlocks
+        wallBlocks = List.filter (\b -> b.tile == Wall) blocks
     in 
-    if not <| addmodel delta 0 then
-        vec2 delta 0
-    else if not <| addmodel -delta 0 then
-        vec2 -delta 0
-    else if not <| addmodel 0 delta then
-        vec2 0 delta
-    else if not <| addmodel 0 -delta then
-        vec2 0 -delta
-    else if not <| addmodel delta delta then
-        vec2 delta delta
-    else if not <| addmodel -delta delta then
-        vec2 -delta delta
-    else if not <| addmodel -delta -delta then
-        vec2 -delta -delta
-    else if not <| addmodel delta -delta then
-        vec2 delta -delta
-    else nearestClear blocks position radius (delta + 5) 
+        if not <| addmodel delta 0 then
+            vec2 delta 0
+        else if not <| addmodel -delta 0 then
+            vec2 -delta 0
+        else if not <| addmodel 0 delta then
+            vec2 0 delta
+        else if not <| addmodel 0 -delta then
+            vec2 0 -delta
+        else if not <| addmodel delta delta then
+            vec2 delta delta
+        else if not <| addmodel -delta delta then
+            vec2 -delta delta
+        else if not <| addmodel -delta -delta then
+            vec2 -delta -delta
+        else if not <| addmodel delta -delta then
+            vec2 delta -delta
+        else nearestClear blocks position radius (delta + 5) 
 
 oneCollide : List Vec2 -> Block -> Bool
 oneCollide points b =
@@ -153,21 +159,22 @@ oneCollide points b =
         isIntersectingX p   = ((getX p) <= bright) && ((getX p) >= bleft)
         isIntersectingY p   = ((getY p) <= btop) && ((getY p) >= bbot)
         isIntersectingAny p = (isIntersectingX p) && (isIntersectingY p)
-        didCollide          = List.any isIntersectingAny points
-    in didCollide
+    in 
+        List.any isIntersectingAny points
 
 bounceDir : Model -> Velocity -> Block -> Velocity
 bounceDir model vel b =
-    let halflen = b.length / 2.0
+    let 
+        halflen = b.length / 2.0
         utop    = add b.pos (vec2 0 halflen)
         dtop    = add b.pos (vec2 0 (-halflen))
         rtop    = add b.pos (vec2 (-halflen) 0)
         ltop    = add b.pos (vec2 halflen 0)
     in if 
-        min (distance model.pos utop) (distance model.pos dtop) <=
-        min (distance model.pos ltop) (distance model.pos rtop)
-        then vec2 (getX vel) (Basics.negate (getY vel))
-        else vec2 (Basics.negate (getX vel)) (getY vel)
+           min (distance model.pos utop) (distance model.pos dtop) <=
+           min (distance model.pos ltop) (distance model.pos rtop)
+       then vec2 (getX vel) (Basics.negate (getY vel))
+       else vec2 (Basics.negate (getX vel)) (getY vel)
 
 addTrail : List (Int, Vec2) -> Vec2 -> List (Int, Vec2)
 addTrail list pos =
@@ -192,17 +199,26 @@ blank =
     , paused     = False
     , slowed     = False
     , time       = 0
+    , maps       = [map1, map2, map3]
     }
 
-init : Model -> String -> Model
-init model str = 
-    let thismap = getLevel str
+loadNext : Model -> Model
+loadNext model =
+    let
+        h = List.head model.maps
+        t = case List.tail model.maps of
+               Nothing -> []
+               Just a -> a
     in
-    { model
-    | blocks <- snd thismap
-    , pos <- fst thismap
-    }
-       
+        case h of
+            Nothing -> blank
+            Just str -> { blank
+                        | blocks <- snd <| getLevel str
+                        , pos <- fst <| getLevel str
+                        , maps <- t
+                        , time <- model.time
+                        }
+
 model : Signal Model
-model = Signal.foldp update (init blank blockMap2) signals
+model = Signal.foldp update (loadNext blank) signals
 

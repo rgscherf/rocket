@@ -22,6 +22,7 @@ slowInactive = darkGrey
 player       = green
 playerTrail  = lightGreen
 textColour = white
+exitColour = yellow
 
 -----------------
 -- RENDERING
@@ -67,6 +68,7 @@ drawBlock m b =
                     SlowPad -> if m.slowed
                                then slowInactive
                                else slowActive
+                    ExitPad -> exitColour
     in
     rect b.length b.length
        |> filled color

@@ -15,9 +15,10 @@ type alias Model =
     , blocks     : List Block
     , debug      : Bool
     , trail      : List (Int, Vec2)
-    , paused : Bool
-    , slowed : Bool
-    , time : Float
+    , paused     : Bool
+    , slowed     : Bool
+    , time       : Float
+    , maps       : List String
     }
 
 type Tile
